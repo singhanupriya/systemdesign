@@ -1,0 +1,74 @@
+https://www.youtube.com/watch?v=tv54FY48Vio&list=PLliXPok7ZonlZJuAN0hvUnf5ovFepjxU0&index=2
+
+Takes user input shape and draw the shape.
+
+/******************************************************************************
+
+Welcome to GDB Online.
+GDB online is an online compiler and debugger tool for C, C++, Python, Java, PHP, Ruby, Perl,
+C#, VB, Swift, Pascal, Fortran, Haskell, Objective-C, Assembly, HTML, CSS, JS, SQLite, Prolog.
+Code, Compile, Run and Debug online from anywhere in world.
+
+*******************************************************************************/
+#include <iostream>
+
+using namespace std;
+
+class Shape{  //asbstract class
+    
+    public:
+     virtual void draw()=0;
+    
+};
+
+class Rectangle: public Shape{
+    
+    public:
+        void draw()
+        {
+            cout<<"It is a rectangle\n";
+        }
+    
+};
+
+
+class Square: public Shape{
+    
+    public:
+        void draw()
+        {
+            cout<<"It is a square\n";
+        }
+    
+};
+
+class ShapeFactory{
+    public:
+    
+    static Shape* getShapeType(string userShape)  //static so that u dont have to create an obj
+    {
+        Shape* shape;
+        if(userShape=="rectangle")
+        {
+            shape=new Rectangle();
+        }
+        else if(userShape=="square")
+        {
+            shape=new Square();
+        }
+        return shape;
+    }
+};
+
+int main()
+{
+    string userShape;
+    getline(cin,userShape);
+    
+    Shape* shape;
+    shape=ShapeFactory::getShapeType(userShape);
+    
+    shape->draw();
+
+    return 0;
+}
