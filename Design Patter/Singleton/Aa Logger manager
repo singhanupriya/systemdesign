@@ -1,0 +1,260 @@
+U want only one instance of Logger class to be created
+
+Step 1: You want only one instance of ur class, if u give the power to the user they can create any number of instances.
+
+/******************************************************************************
+
+Welcome to GDB Online.
+GDB online is an online compiler and debugger tool for C, C++, Python, Java, PHP, Ruby, Perl,
+C#, VB, Swift, Pascal, Fortran, Haskell, Objective-C, Assembly, HTML, CSS, JS, SQLite, Prolog.
+Code, Compile, Run and Debug online from anywhere in world.
+
+*******************************************************************************/
+#include <iostream>
+
+using namespace std;
+
+class Logger{
+    protected:
+    static int count;
+    
+    public:
+    Logger()
+    {
+        count++;
+        cout<<count<<" instance created\n";
+    }
+    
+    void logs(string msg)
+    {
+        cout<<msg<<endl;
+    }
+    
+};
+
+int  Logger::count=0;
+
+int main()
+{
+    Logger* logger1=new Logger();
+    logger1->logs("User 1");
+    Logger* logger2=new Logger();
+    logger2->logs("User2");
+
+    return 0;
+}
+
+
+Step 2: In order to prevent this, make the constructor private and create a static fn that returns an instance of the class.
+This static fn will return a static instance.
+
+
+#include <iostream>
+
+using namespace std;
+
+class Logger{
+    static Logger* loggerInstance;
+    static int count;
+    
+    Logger()
+    {
+        count++;
+        cout<<count<<" instance created\n";
+    }
+    
+    public:
+    
+    static Logger* getLog()
+    {
+        if(loggerInstance==nullptr)
+        {
+            loggerInstance=new Logger();
+        }
+        return loggerInstance;
+    }
+    
+    void logs(string msg)
+    {
+        cout<<msg<<endl;
+    }
+    
+};
+
+int  Logger::count=0;
+Logger* Logger::loggerInstance=nullptr;
+
+int main()
+{
+    Logger* logger1=Logger::getLog();
+    logger1->logs("User 1");
+    
+    Logger* logger2=Logger::getLog();
+    logger2->logs("User2");
+
+    return 0;
+}
+
+Output: 
+1 instance created
+User 1
+User2
+
+
+Step3: This is not multi-thread friendly, hence, we will use mutex.
+
+/******************************************************************************
+
+Welcome to GDB Online.
+GDB online is an online compiler and debugger tool for C, C++, Python, Java, PHP, Ruby, Perl,
+C#, VB, Swift, Pascal, Fortran, Haskell, Objective-C, Assembly, HTML, CSS, JS, SQLite, Prolog.
+Code, Compile, Run and Debug online from anywhere in world.
+
+*******************************************************************************/
+#include <iostream>
+#include<thread>
+#include<mutex>
+
+using namespace std;
+
+class Logger{
+    static Logger* loggerInstance;
+    static int count;
+    
+    Logger()
+    {
+        count++;
+        cout<<count<<" instance created\n";
+    }
+    
+    public:
+    
+    static Logger* getLog()
+    {
+        if(loggerInstance==nullptr)
+        {
+            loggerInstance=new Logger();
+        }
+        return loggerInstance;
+    }
+    
+    void logs(string msg)
+    {
+        cout<<msg<<endl;
+    }
+    
+};
+
+int  Logger::count=0;
+Logger* Logger::loggerInstance=nullptr;
+
+void user1()
+{
+    Logger* logger1=Logger::getLog();
+    logger1->logs("User 1");
+}
+
+void user2()
+{
+    Logger* logger2=Logger::getLog();
+    logger2->logs("User2");
+}
+
+int main()
+{
+    thread t1(user1);
+    thread t2(user2);
+    
+    t1.join();
+    t2.join();
+
+    return 0;
+}
+
+
+OUtput:
+1 instance created
+User 1
+2 instance created
+User2
+
+
+Step 4: Double-check lock as mutex is expensive we want lock only when the instance is not created
+
+
+/******************************************************************************
+
+Welcome to GDB Online.
+GDB online is an online compiler and debugger tool for C, C++, Python, Java, PHP, Ruby, Perl,
+C#, VB, Swift, Pascal, Fortran, Haskell, Objective-C, Assembly, HTML, CSS, JS, SQLite, Prolog.
+Code, Compile, Run and Debug online from anywhere in world.
+
+*******************************************************************************/
+#include <iostream>
+#include<thread>
+#include<mutex>
+
+using namespace std;
+
+class Logger{
+    static Logger* loggerInstance;
+    static int count;
+    static mutex mtx;
+    
+    Logger()
+    {
+        count++;
+        cout<<count<<" instance created\n";
+    }
+    
+    public:
+    
+    static Logger* getLog()
+    {
+        if(loggerInstance==nullptr)
+        {
+            mtx.lock();
+            if(loggerInstance==nullptr)
+            {
+                loggerInstance=new Logger();
+            }
+            mtx.unlock();
+        }
+        
+        return loggerInstance;
+    }
+    
+    void logs(string msg)
+    {
+        cout<<msg<<endl;
+    }
+    
+};
+
+int  Logger::count=0;
+Logger* Logger::loggerInstance=nullptr;
+mutex Logger::mtx;
+
+void user1()
+{
+    Logger* logger1=Logger::getLog();
+    logger1->logs("User 1");
+}
+
+void user2()
+{
+    Logger* logger2=Logger::getLog();
+    logger2->logs("User2");
+}
+
+int main()
+{
+    thread t1(user1);
+    thread t2(user2);
+    
+    t1.join();
+    t2.join();
+
+    return 0;
+}
+
