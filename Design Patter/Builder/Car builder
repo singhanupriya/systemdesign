@@ -172,3 +172,19 @@ int main()
     car2->specs();
     return 0;
 }
+
+
+Output:
+
+Builder constructor called
+Builder constructor called
+Director constructor
+Director constructor
+Laptop: HP Monitor
+HP Keyboard
+HP Speaker
+
+Laptop: Dell Monitor
+Dell Keyboard
+Dell Speaker
+
