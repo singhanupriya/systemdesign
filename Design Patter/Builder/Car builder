@@ -113,6 +113,7 @@ class FerrariCarBuilder:public CarBuilder{
     {
         Wheel* wheel=new Wheel();
         wheel->size=15;
+        car->wheel=wheel;     //MAP THE PARTS TO CAR
         return wheel;
     }
     
@@ -120,12 +121,14 @@ class FerrariCarBuilder:public CarBuilder{
     {
         Engine* engine=new Engine();
         engine->horsepower=2400;
+        car->engine=engine;
         return engine;
     }
     Shape* buildShape()
     {
         Shape* shape=new Shape();
         shape->model="Ferrari";
+        car->shape=shape;
         return shape;
     }
     
@@ -174,17 +177,15 @@ int main()
 }
 
 
-Output:
-
-Builder constructor called
-Builder constructor called
+Builder constructor
+Builder constructor
 Director constructor
 Director constructor
-Laptop: HP Monitor
-HP Keyboard
-HP Speaker
-
-Laptop: Dell Monitor
-Dell Keyboard
-Dell Speaker
-
+-------------
+Tyre size 10
+Engine power 100
+Shape Honda
+-------------
+Tyre size 15
+Engine power 2400
+Shape Ferrari
