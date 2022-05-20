@@ -1,0 +1,160 @@
+
+https://gist.github.com/pazdera/1121152
+
+
+
+#include <iostream>
+
+using namespace std;
+
+
+//parts of the car product
+class Wheel{
+    public:
+    int size;
+    
+};
+
+class Engine{
+    
+    public:
+    int horsepower;
+    
+};
+
+class Shape{
+    public:
+    string model;
+};
+
+//Product class
+class Car{
+    
+    public:
+    
+    Wheel* wheel;
+    Engine* engine;
+    Shape* shape;
+    
+    
+    
+    void specs()
+    {
+        cout<<"-------------\n";
+        cout<<"Tyre size "<<wheel->size<<"\n";
+        cout<<"Engine power "<<engine->horsepower<<"\n";
+        cout<<"Shape "<<shape->model<<endl;
+        
+    }
+    
+};
+
+//Builder class
+class CarBuilder{
+    
+    protected:
+    Car* car;
+    
+    
+    
+    public:
+    virtual Wheel* buildWheel()=0;
+    virtual Engine* buildEngine()=0;
+    virtual Shape* buildShape()=0;
+    
+    
+};
+
+//Concrete Class
+class HondaCarBuilder:public CarBuilder{
+    
+    
+    public:
+    Wheel* buildWheel()
+    {
+        Wheel* wheel=new Wheel();
+        wheel->size=10;
+        return wheel;
+    }
+    
+    Engine* buildEngine()
+    {
+        Engine* engine=new Engine();
+        engine->horsepower=100;
+        return engine;
+    }
+    Shape* buildShape()
+    {
+        Shape* shape=new Shape();
+        shape->model="Honda";
+        return shape;
+    }
+    
+};
+
+class FerrariCarBuilder:public CarBuilder{
+    
+    public:
+    
+    Wheel* buildWheel()
+    {
+        Wheel* wheel=new Wheel();
+        wheel->size=15;
+        return wheel;
+    }
+    
+    Engine* buildEngine()
+    {
+        Engine* engine=new Engine();
+        engine->horsepower=2400;
+        return engine;
+    }
+    Shape* buildShape()
+    {
+        Shape* shape=new Shape();
+        shape->model="Ferrari";
+        return shape;
+    }
+    
+};
+
+//Director
+
+class CarDirector{
+    
+    CarBuilder* carBuilder;
+    
+    public:
+    
+    CarDirector(CarBuilder* pCarBuilder)
+    {
+        carBuilder=pCarBuilder;
+    }
+    
+    Car* buildCar()
+    {
+        Car* car=new Car();
+        car->wheel=carBuilder->buildWheel();
+        car->engine=carBuilder->buildEngine();
+        car->shape=carBuilder->buildShape();
+        return car;
+    }
+    
+};
+
+int main()
+{
+    
+    HondaCarBuilder* hondaCar=new HondaCarBuilder();
+    FerrariCarBuilder* ferrariCar=new FerrariCarBuilder();
+    
+    CarDirector* director1=new CarDirector(hondaCar);
+    CarDirector* director2=new CarDirector(ferrariCar);
+    
+    Car* car1=director1->buildCar();
+    Car* car2=director2->buildCar();
+    
+    car1->specs();
+    car2->specs();
+    return 0;
+}
