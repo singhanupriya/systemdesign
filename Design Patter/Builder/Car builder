@@ -2,7 +2,6 @@
 https://gist.github.com/pazdera/1121152
 
 
-
 #include <iostream>
 
 using namespace std;
@@ -55,12 +54,23 @@ class CarBuilder{
     protected:
     Car* car;
     
+    CarBuilder()
+    {
+        car=new Car();
+        cout<<"Builder constructor\n";
+    }
     
     
     public:
+   
     virtual Wheel* buildWheel()=0;
     virtual Engine* buildEngine()=0;
     virtual Shape* buildShape()=0;
+    
+    Car* getCar()
+    {
+        return car;
+    }
     
     
 };
@@ -74,6 +84,7 @@ class HondaCarBuilder:public CarBuilder{
     {
         Wheel* wheel=new Wheel();
         wheel->size=10;
+        car->wheel=wheel;
         return wheel;
     }
     
@@ -81,12 +92,14 @@ class HondaCarBuilder:public CarBuilder{
     {
         Engine* engine=new Engine();
         engine->horsepower=100;
+        car->engine=engine;
         return engine;
     }
     Shape* buildShape()
     {
         Shape* shape=new Shape();
         shape->model="Honda";
+        car->shape=shape;
         return shape;
     }
     
@@ -129,15 +142,16 @@ class CarDirector{
     CarDirector(CarBuilder* pCarBuilder)
     {
         carBuilder=pCarBuilder;
+        cout<<"Director constructor\n";
     }
     
     Car* buildCar()
     {
-        Car* car=new Car();
-        car->wheel=carBuilder->buildWheel();
-        car->engine=carBuilder->buildEngine();
-        car->shape=carBuilder->buildShape();
-        return car;
+        //Car* car=new Car();
+        carBuilder->buildWheel();
+        carBuilder->buildEngine();
+        carBuilder->buildShape();
+        return carBuilder->getCar();
     }
     
 };
