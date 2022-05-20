@@ -135,7 +135,7 @@ class FerrariCarBuilder:public CarBuilder{
 
 class CarDirector{
     
-    CarBuilder* carBuilder;
+    CarBuilder* carBuilder;  //BUILDER CONS CALLED HERE . Refer: https://www.geeksforgeeks.org/when-are-constructors-called/
     
     public:
     
