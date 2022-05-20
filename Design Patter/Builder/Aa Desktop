@@ -1,0 +1,198 @@
+https://www.youtube.com/watch?v=MrrrtQT_8SE
+
+We will be building a Desktop.
+
+/******************************************************************************
+
+Welcome to GDB Online.
+GDB online is an online compiler and debugger tool for C, C++, Python, Java, PHP, Ruby, Perl,
+C#, VB, Swift, Pascal, Fortran, Haskell, Objective-C, Assembly, HTML, CSS, JS, SQLite, Prolog.
+Code, Compile, Run and Debug online from anywhere in world.
+
+*******************************************************************************/
+#include <iostream>
+
+using namespace std;
+
+//The product class contains the parts of the product and setters for those parts.
+class Desktop{
+    
+    string monitor;
+    string keyboard;
+    string speaker;
+    
+    public:
+    
+    void setMonitor(string pMonitor)
+    {
+        monitor=pMonitor;
+    }
+    
+    void setKeyboard(string pKeyboard)
+    {
+        keyboard=pKeyboard;
+    }
+    
+    void setSpeaker(string pSpeaker)
+    {
+        speaker=pSpeaker;
+    }
+    
+    void showSpecs()
+    {
+        cout<<"Laptop: "<<monitor<<endl<<keyboard<<endl<<speaker<<endl<<endl;
+    }
+    
+};
+
+/*
+The builder class (Abstract class)
+1. It has the product class object as protected as all concrete class will inherit the product
+    obj from builder class
+2. In the constructor of the builder class, create the product class object so that as soon 
+    a builder is created, a product is created corresponding to it.
+3. It also has all the partsConf function which will be overriden by the concrete class.
+4. Since the desktop is a part of builder class, we can create a getter for the desktop, alternatively, 
+    u can also create a desktop getter in the concrete classes which inherit this builder class.
+     
+*/
+class DesktopBuilder{
+    
+    protected:
+    Desktop* desktop;
+    
+    //this is an abstract class, a public constructor would mean anyone can create an object
+    //hence keep the constructor private
+    DesktopBuilder()
+    {
+        desktop=new Desktop();
+    }
+    
+    
+    public:
+    
+    
+    virtual void buildMonitor()=0;
+    virtual void buildKeyboard()=0;
+    virtual void buildSpeaker()=0;
+    
+    //desktop getter
+    virtual Desktop* getDesktop()
+    {
+        return desktop;
+    }
+    
+};
+
+/*
+Concrete builders - represent the diff types of desktop we will be having.
+Eg- HPDesktop and DellDesktop
+1. U actually build the parts here and configure them by implementing the builder class pure virtual fns.
+
+*/
+
+class DellDesktopBuilder:public DesktopBuilder{
+    
+    void buildMonitor(){
+        desktop->setMonitor("Dell Monitor");
+    }
+    
+    void buildKeyboard(){
+        desktop->setKeyboard("Dell Keyboard");
+    }
+    
+    void buildSpeaker()
+    {
+        desktop->setSpeaker("Dell Speaker");
+    }
+    
+};
+
+class HPDesktopBuilder:public DesktopBuilder{
+    
+    void buildMonitor(){
+        desktop->setMonitor("HP Monitor");
+    }
+    
+    void buildKeyboard(){
+        desktop->setKeyboard("HP Keyboard");
+    }
+    
+    void buildSpeaker()
+    {
+        desktop->setSpeaker("HP Speaker");
+    }
+    
+};
+
+/*
+The Director
+
+1. We need to include the builder in the director and the director will use our builder to create
+    the product.
+2. In the constructor of the director, builder obj will be passed.
+3. Director tells the process/steps to build the product.
+4. It has the builder and calls its builder fns to build the obf
+
+*/
+
+class DesktopDirector{
+    
+    private:
+    DesktopBuilder* desktopBuilder;
+    
+    public:
+    
+    DesktopDirector(DesktopBuilder* pDesktopBuilder)
+    {
+        desktopBuilder=pDesktopBuilder;
+    }
+    
+    Desktop* buildDesktop()
+    {
+        desktopBuilder->buildMonitor();
+        desktopBuilder->buildKeyboard();
+        desktopBuilder->buildSpeaker();
+        
+        //builder has a getter of desktop type.
+        return desktopBuilder->getDesktop();
+        
+    }
+};
+
+/*
+1. In the main fn, use the concrete class to create the obj
+2. Create director which will be responsible for building these objs and pass the concrete class objs in it
+
+*/
+
+int main()
+{
+    HPDesktopBuilder* hpDesktopBuilder= new HPDesktopBuilder();
+    DellDesktopBuilder* dellDesktopBuilder= new DellDesktopBuilder();
+    
+    DesktopDirector* director1= new DesktopDirector(hpDesktopBuilder);
+    
+    DesktopDirector* director2= new DesktopDirector(dellDesktopBuilder);
+    
+    Desktop* desktop1=director1->buildDesktop();
+    Desktop* desktop2=director2->buildDesktop();
+    
+    desktop1->showSpecs();
+    desktop2->showSpecs();
+    
+    
+
+    return 0;
+}
+
+
+Output:
+
+Laptop: HP Monitor
+HP Keyboard
+HP Speaker
+
+Laptop: Dell Monitor
+Dell Keyboard
+Dell Speaker
