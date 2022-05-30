@@ -1,0 +1,160 @@
+https://www.youtube.com/watch?v=IglWExgxA-U&t=375
+https://www.bogotobogo.com/DesignPatterns/abstractfactorymethod.php
+
+1. Group similar objects together.
+2. Group of many factory methods
+
+Here we are designing Widget which has a button and a scroll bar for mac and windows.
+Mac widget should have mac button and scroll and Windows widget should have windows button and scroll
+
+
+
+/******************************************************************************
+
+Welcome to GDB Online.
+GDB online is an online compiler and debugger tool for C, C++, Python, Java, PHP, Ruby, Perl,
+C#, VB, Swift, Pascal, Fortran, Haskell, Objective-C, Assembly, HTML, CSS, JS, SQLite, Prolog.
+Code, Compile, Run and Debug online from anywhere in world.
+
+*******************************************************************************/
+#include <iostream>
+
+using namespace std;
+
+//Abstract product A
+class Button{
+    
+    public:
+    virtual void draw()=0;
+    
+    
+};
+
+class MacButton:public Button{
+    public:
+    void draw()
+    {
+        cout<<"Mac Button\n";
+    }
+};
+
+class WinButton:public Button{
+    public:
+    void draw()
+    {
+        cout<<"Windows Button\n";
+    }
+};
+
+
+//Abstract Product B
+
+class Scrollbar{
+    public:
+    virtual void paint()=0;
+    
+};
+
+class MacScrollbar:public Scrollbar{
+    
+    public:
+    void paint()
+    {
+        cout<<"Mac scroll bar\n";
+    }
+
+    
+};
+
+class WinScrollbar:public Scrollbar{
+    
+    public:
+    void paint()
+    {
+        cout<<"Windows scroll bar\n";
+    }
+
+    
+};
+
+
+//Abstract factoryt
+
+class GUIFfactory{
+    
+    public:
+    virtual Button* createButton()=0;
+    virtual Scrollbar* createScrollbar()=0;
+    
+};
+
+//concrete factory 1 
+
+
+class MacGUIfactory: public GUIFfactory{
+    
+    public:
+    Button* createButton()
+    {
+        Button* button=new MacButton;  //creating mac button -> polymorphism
+        return button;
+    }
+    
+    Scrollbar* createScrollbar()
+    {
+        return new MacScrollbar;
+    }
+    
+};
+
+//concrete factory 2
+
+class WinGUIfactory: public GUIFfactory{
+    
+    public:
+    Button* createButton()
+    {
+        Button* button=new WinButton;  //creating windows button -> polymorphism
+        return button;
+    }
+    
+    Scrollbar* createScrollbar()
+    {
+        return new WinScrollbar;
+    }
+    
+};
+
+
+int main()
+{
+    GUIFfactory* guifactory;
+    Button* btn;
+    Scrollbar* scr;
+    
+    guifactory=new MacGUIfactory;
+    btn=guifactory->createButton();  //polymorphism
+    scr=guifactory->createScrollbar();
+    btn->draw();
+    scr->paint();
+    
+    GUIFfactory* guifactory1;
+    Button* btn1;
+    Scrollbar* scr1;
+    
+    guifactory1=new WinGUIfactory;
+    btn1=guifactory1->createButton();  //polymorphism
+    scr1=guifactory1->createScrollbar();
+    btn1->draw();
+    scr1->paint();
+
+    return 0;
+}
+
+
+Output:
+
+Mac Button
+Mac scroll bar
+Windows Button
+Windows scroll bar
