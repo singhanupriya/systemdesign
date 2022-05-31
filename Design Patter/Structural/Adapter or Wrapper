@@ -1,0 +1,106 @@
+
+
+Structural design patterns are concerned with how classes and objects can be composed, to form larger structures.
+The structural design patterns simplifies the structure by identifying the relationships.
+
+
+Adapting an interface into another according to client expectation.
+An Adapter Pattern says that just "converts the interface of a class into another interface that a client wants".
+The Adapter Pattern is also known as Wrapper.
+A class adapter uses multiple inheritance to adapt one interface to another.
+
+
+There are the following specifications for the adapter pattern:
+
+Target Interface: This is the desired interface class which will be used by the clients.
+Adapter class: This class is a wrapper class which implements the desired target interface and modifies the specific request available from the Adaptee class.
+Adaptee class: This is the class which is used by the Adapter class to reuse the existing functionality and modify them for desired use.
+Client: This class will interact with the Adapter class.
+
+
+Eg-> The user wants to draw a rectangle passing x,y,width and height but we have a legacy class that expects coords (x1,y1,x2,y2) we need to convert this 
+legacy class into a class as per user requirements.
+
+
+
+
+
+/******************************************************************************
+
+Welcome to GDB Online.
+GDB online is an online compiler and debugger tool for C, C++, Python, Java, PHP, Ruby, Perl,
+C#, VB, Swift, Pascal, Fortran, Haskell, Objective-C, Assembly, HTML, CSS, JS, SQLite, Prolog.
+Code, Compile, Run and Debug online from anywhere in world.
+
+*******************************************************************************/
+#include <iostream>
+
+using namespace std;
+
+//Target
+class Rectangle{
+    
+    public:
+    virtual void draw()=0;
+    
+};
+
+//Adaptee
+class LegacyRectangle{
+    
+    private:
+    int x1_;
+    int y1_;
+    int x2_;
+    int y2_;
+    
+    public:
+    LegacyRectangle(int x1, int y1, int x2, int y2)
+    {
+        x1_=x1;
+        y1_=y1;
+        x2_=x2;
+        y2_=y2;
+        cout<<"Legacy Rectangle constructor \n";
+    }
+    
+    void oldDraw()
+    {
+        cout<<"Old rectangle\n";
+    }
+    
+};
+
+//Adaptor
+class AdapterRectangle:public Rectangle, private LegacyRectangle{
+    
+    public:
+    
+    AdapterRectangle(int x,int y, int w, int h): LegacyRectangle(x,y,x+w,y+h)
+    {
+        cout<<"Adapter Rectangle constructor\n";
+    }
+    
+    void draw()
+    {
+        cout<<"Adapter\n";
+        oldDraw();
+    }
+    
+};
+
+
+int main()
+{
+    Rectangle* r=new AdapterRectangle(10,20,30,40);
+    r->draw();
+
+    return 0;
+}
+
+
+output->
+Legacy Rectangle constructor 
+Adapter Rectangle constructor
+Adapter
+Old rectangle
