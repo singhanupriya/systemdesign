@@ -1,0 +1,141 @@
+https://www.youtube.com/watch?v=17i8a-pUtx8&list=PLliXPok7ZonlZJuAN0hvUnf5ovFepjxU0&index=6
+
+
+#include<iostream>
+
+using namespace std;
+
+class Button{
+    public:
+    virtual void drawButton()=0;
+
+};
+
+class MacButton: public Button{
+
+    public:
+    void drawButton()
+    {
+        cout<<"Mac Button\n";
+    }
+
+};
+
+class WinButton: public Button{
+
+    public:
+    void drawButton()
+    {
+        cout<<"Windows Button\n";
+    }
+
+};
+
+class TextBox{
+
+    public:
+    virtual void drawTextBox()=0;
+
+
+
+};
+ 
+class WinTextBox:public TextBox{
+    public:
+
+    void drawTextBox()
+    {
+        cout<<"Windows Text Box\n";
+    }
+
+};
+
+class MacTextBox:public TextBox{
+    public:
+
+    void drawTextBox()
+    {
+        cout<<"Mac Text Box\n";
+    }
+
+};
+
+class Factory{
+    public:
+    virtual Button* createButton()=0;
+    virtual TextBox* createTextBox()=0;
+};
+
+class MacFactory:public Factory{
+    public:
+
+    Button* createButton()
+    {
+        return new MacButton;
+    }
+
+    TextBox* createTextBox()
+    {
+        return new MacTextBox;
+    }
+
+};
+
+class WinFactory:public Factory{
+    public:
+
+    Button* createButton()
+    {
+        return new WinButton;
+    }
+
+    TextBox* createTextBox()
+    {
+        return new WinTextBox;
+    }
+
+};
+
+
+class GUIFactory
+{
+    public:
+    //we dont want a child of this class to use this fn
+    static Factory* createFactory(string osType)
+    {
+        if(osType=="Mac")
+        {
+            return new MacFactory();
+        }
+        else if(osType=="Windows")
+        {
+            return new WinFactory();
+        }
+        return new MacFactory();
+    }
+};
+
+
+//user enters the type of OS and based on that the complete factory is created.
+int main()
+{
+    cout<<"Enter the type of OS: ";
+    string osType;
+    getline(cin,osType);
+
+    Factory* factory=GUIFactory::createFactory(osType);
+    Button* btn=factory->createButton();
+    TextBox* txt=factory->createTextBox();
+
+    btn->drawButton();
+    txt->drawTextBox();
+
+
+    return 0;
+}
+
+
+Output:
+Enter the type of OS: Windows 
+Windows Button
+Windows Text Box
