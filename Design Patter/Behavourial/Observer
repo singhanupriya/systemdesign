@@ -1,0 +1,88 @@
+https://www.youtube.com/watch?v=gbTWHeGUeXs&list=PLliXPok7ZonlZJuAN0hvUnf5ovFepjxU0&index=5
+
+
+#include<iostream>
+#include<list>
+
+using namespace std;
+
+//abstract class
+class Observer{
+
+    public:
+    virtual void notify(string msg)=0;
+
+};
+//users are observes
+class User:public Observer{
+
+    private:
+    int userId;
+
+    public:
+    User(int userId)
+    {
+        this->userId=userId;
+    }
+
+    void notify(string msg)
+    {
+        cout<<"Notification sent to user "<<this->userId<<" about "<<msg<<endl;
+    }
+
+};
+
+class Group{
+
+    //create a list of all users who are in the grp
+    private:
+    list<Observer*> observers;  
+
+    public:
+    void subscribe(Observer* user)
+    {
+        observers.push_back(user);
+    }
+
+    void unsubscribe(Observer* user)
+    {
+        observers.remove(user);
+    }
+
+    void notify(string msg)
+    {
+        for(auto user:observers)
+        {
+            user->notify(msg);
+        }
+    }
+};
+
+
+int main()
+{
+    Group* group=new Group;
+
+    User* user1=new User(1);
+    User* user2=new User(2);
+    User* user3=new User(3);
+
+    group->subscribe(user1);
+    group->subscribe(user2);
+    group->subscribe(user3);
+
+    group->notify("new message");
+
+    group->unsubscribe(user2);
+
+    group->notify("new message");
+
+
+    return 0;
+}
+
+Notification sent to user 1 about new message
+Notification sent to user 2 about new message
+Notification sent to user 3 about new message
+Notification sent to user 1 about new message
+Notification sent to user 3 about new message
