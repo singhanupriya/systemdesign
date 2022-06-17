@@ -1,0 +1,261 @@
+https://www.youtube.com/watch?v=71W8QTdFWw8
+
+
+Requirements and Goals of the System
+Our ticket booking service should meet the following requirements:
+
+It should be able to list the cities where affiliate cinemas are located.
+Each cinema can have multiple halls and each hall can run one movie show at a time.
+Each Movie will have multiple shows.
+Customers should be able to search movies by their title, language, genre, release date, and city name.
+Once the customer selects a movie, the service should display the cinemas running that movie and its available shows.
+The customer should be able to select a show at a particular cinema and book their tickets.
+The service should show the customer the seating arrangement of the cinema hall. The customer should be able to select multiple seats according to their preference.
+The customer should be able to distinguish between available seats and booked ones.
+The system should send notifications whenever there is a new movie, as well as when a booking is made or canceled.
+Customers of our system should be able to pay with credit cards or cash.
+The system should ensure that no two customers can reserve the same seat.
+Customers should be able to add a discount coupon to their payment.
+
+
+Things to keep in mind:
+
+1. Show will have the movie, cinemaPlayedAt and seats as seats price might depend upon the show.
+2. The service class(static) will have the list of movie and cinema which can be displayed depending upon the city.
+3. Movie class will have a map<City,list<show>>
+4. We will have an admin and customer class and a different class for search(static)
+
+Design Pattern-
+1. In order to extend it for future, we can use STRATERGY pattern if we want to extend it to different events.
+2. MovieShow -> Event (base class) and CinemaShow, StandupShow (its base class)
+3. Movie -> EventType (base class)and Cinema, Standup(its child class)
+4. For notification, we can use OBSERVER pattern.
+
+
+#include<iostream>
+#include<vector>
+#include<unordered_map>
+
+using namespace std;
+
+class City;
+class Cinema;
+class Movie;
+class User;
+class Hall;
+class Show;
+class Seat;
+class Booking;
+class Payment;
+class Discount;
+
+class Service{
+
+    static unordered_map<City*, vector<Cinema*>> listOfCinemaPerCity;
+    static vector<Movie*> listOfMovie;
+    static vector<User*> listOfUser;
+
+    public:
+
+    static vector<Movie*> getMovies(string city);
+    static vector<Cinema*> getCinema(string city);
+    static void movieNotif();
+    static void newBookingNotif();
+    static void cancelBookingNotif();
+
+
+
+};
+
+unordered_map<City*, vector<Cinema*>> Service::listOfCinemaPerCity;
+vector<Movie*> Service::listOfMovie;
+vector<User*> Service::listOfUser;
+
+class Address{
+    string street;
+    string city;
+    string state;
+    string country;
+    int pincode;
+};
+
+class Cinema{
+
+    string cinemaId;
+    Address address;
+    vector<Hall*> hallInCinema;
+    vector<Movie*> movieInCinema;
+
+};
+
+class Hall{
+    string hallId;
+    string hallName;
+    vector<Show*> showInHall;
+    int totalSeats;
+
+
+};
+
+class Show{
+    string showId;
+    Cinema cinemaPlayedAt;
+    Movie moviePlayed;
+    string startTime;
+    string endTime;
+    vector<Seat*> seatsInShow;
+
+    public:
+
+    bool isShowAvailable()
+    {
+
+    }
+
+};
+
+enum Genre{
+    horror,
+    comedy,
+    drama,
+};
+
+enum Category{
+    premium,
+    delux,
+    regular,
+
+};
+
+class Date{
+    int day;
+    int month;
+    int year;
+};
+
+class Movie{
+
+    string movieId;
+    string movieTitle;
+    Genre genre;
+    Date releaseDate;
+    int movieDuration;
+    string language;
+    unordered_map<City*,vector<Show*>> movieShowPerCity;
+
+
+
+};
+
+class Seat{
+    string seatId;
+    Category category;
+    bool available;
+    double price;
+
+};
+
+class Search{
+
+    public:
+    static vector<Movie*> searchByTitle(string title);
+    static vector<Movie*> searchByLanguage(string language);
+    static vector<Movie*> searchByGenre(int genre);
+    static vector<Movie*> searchByReleaseDate(Date date);
+    static vector<Movie*> searchByCity(string city);
+
+
+
+
+};
+
+class User{
+    string userId;
+    string firstName;
+    string lastName;
+    string email;
+    string contact;
+
+};
+
+class Admin:public User{
+    public:
+    Movie* addMovie(string movieId,string movieName);
+    bool removeMovie(Movie* movie);
+
+    Cinema* addCinema();
+    bool removeCinema(Cinema* cinema);
+
+};
+
+class Customer:public User{
+
+    public:
+
+    Booking* bookMovie(Movie* movie, Cinema* Cinema, Show* show, vector<Seat*> seatsSelected)
+    {
+
+    }
+
+    bool cancelBooking(Booking* bookingId)
+    {
+
+    }
+
+};
+
+enum BookingStatus{
+    success,
+    pending,
+    fail,
+
+
+};
+
+class Booking{
+    string bookingId;
+    Movie movie;
+    Cinema cinema;
+    Hall hall;
+    Show show;
+    vector<Seat*> seatsSelected;
+    Payment payment;
+    Date date;
+    BookingStatus bookingStatus;
+};
+
+enum PaymentMethod{
+    cash,
+    card,
+    UPI
+
+};
+
+enum PaymentStatus{
+    fail,
+    success,
+    pending,
+};
+
+class Payment{
+
+    string transactionId;
+    PaymentMethod paymentMethod;
+    Date date;
+    double amount;
+    Discount discount;
+    PaymentStatus paymentStatus;
+
+
+};
+
+class Discount{
+    string discountId;
+    string couponName;
+    double discountAmount;
+
+};
+
+
+
+
