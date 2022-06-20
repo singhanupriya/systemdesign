@@ -1,0 +1,377 @@
+
+
+/*
+
+Customers should be able to search for flights for a given date and source/destination airport.
+
+Customers should be able to reserve a ticket for any scheduled flight. Customers can also build a multi-flight itinerary.
+
+Users of the system can check flight schedules, their departure time, available seats, arrival time, and other flight details.
+
+Customers can make reservations for multiple passengers under one itinerary.
+
+Only the admin of the system can add new aircrafts, flights, and flight schedules. Admin can cancel any pre-scheduled flight (all stakeholders will be notified).
+
+Customers can cancel their reservation and itinerary.
+
+The system should be able to handle the assignment of pilots and crew members to flights.
+
+The system should be able to handle payments for reservations.
+
+The system should be able to send notifications to customers whenever a reservation is made/modified or there is an update for their flights.
+
+
+*/
+
+#include<iostream>
+#include<vector>
+
+using namespace std;
+
+class Flight;
+class Airline;
+class Schedule;
+class User;
+class Date;
+class Crew;
+class Pilot;
+class Booking;
+class Payment;
+
+class MMTService{
+
+    static vector<Flight*> listOfFlights;
+    static vector<Airline*> listOfAirline;
+    
+    static vector<User*> listOfUser;
+
+    public:
+    static vector<Flight*> getFlights(Date date, string source, string destination)
+    {
+
+    }
+
+    void sendNotification()
+    {
+
+    }
+
+
+
+};
+
+vector<Flight*> MMTService::listOfFlights;
+vector<Airline*> MMTService::listOfAirline;
+
+vector<User*> MMTService::listOfUser;
+
+
+class Date{
+    int day;
+    int month;
+    int year;
+
+    public:
+
+    void getDateDetails()
+    {
+        cout<<day<<"-"<<month<<"-"<<year<<endl;
+    }
+};
+
+class Address{
+    string street;
+    string city;
+    string state;
+    string country;
+
+    public:
+
+    string getCityLocation()
+    {
+        return city;
+    }
+
+};
+
+class Airport{
+    string airportCode;
+    string airportName;
+    Address address;
+
+    public:
+
+    string getCity()
+    {
+        return address.getCityLocation();
+    }
+};
+
+enum SeatClass{
+    Business,
+    Economy,
+
+};
+
+enum SeatStatus{
+    booked,
+    available,
+    notAvailable,
+
+};
+
+class Seat{
+
+    string seatId;
+    SeatClass seatClass;
+    SeatStatus seatStatus;
+    double price;
+
+
+
+};
+
+class Aircraft{
+    string aircraftId;
+    string modelName;
+    string manufacturer;
+    Date dateOfMan;
+    vector<Seat*> listOfSeats;
+
+};
+
+class Airline{
+
+    string airlineId;
+    string airlineName;
+    
+    vector<Aircraft*> listOfAircraftsPerAirline;
+    vector<Pilot*> listOfPilotPerAirline;
+    vector<Crew*> listOfCrewPerAirline;
+
+    public:
+    //virtual Airline* createAirline()=0;
+
+    string getAirlineName()
+    {
+        return airlineName;
+    }
+
+};
+
+/*
+
+class IndigoAirline:public Airline{
+    public:
+
+    Airline* createAirline()
+    {
+        cout<<"Creating Indigo Airline\n";
+        return new IndigoAirline();
+    }
+
+};
+
+class GoAirline:public Airline{
+    public:
+
+    Airline* createAirline()
+    {
+        cout<<"Creating Go Airline\n";
+        return new GoAirline();
+    }
+
+};
+
+class AirlineFactory{
+
+    public:
+
+    static Airline* addAirline(string airlineName)
+    {
+        Airline* airline;
+
+        if(airlineName=="Indigo")
+        {
+            return new IndigoAirline();
+        }
+        else if(airlineName=="Go")
+        {
+            return new GoAirline();
+        }
+    }
+
+};
+*/
+
+enum FlightStatus
+{
+    OnTime,
+    Delayed,
+    Cancalled,
+};
+
+class Flight{
+    string flightNumber;
+    Aircraft aircraft;
+    Airline airline;
+    Airport sourceAirport;
+    Airport destinationAirport;
+    double fareOfFlight;
+    vector<Pilot*> pilotAssigned;
+    vector<Crew*> crewAssigned;
+    FlightStatus flightStatus;
+    Date dateOfTravel;
+
+    public:
+
+    void getDetails()
+    {
+        cout<<"Below are the flight details:\n";
+        cout<<"Flight Number: "<<flightNumber<<"\n";
+        cout<<"Airline: " << airline.getAirlineName()<<endl;
+        cout<<"From :"<<sourceAirport.getCity()<<endl;
+        cout<<"From :"<<destinationAirport.getCity()<<endl;
+        cout<<" Date"; 
+        dateOfTravel.getDateDetails();
+        cout<<endl;
+        cout<<"Fare :"<<fareOfFlight<<endl;
+        cout<<"Flight Status: "<<flightStatus<<endl;
+
+    
+    }
+
+
+    
+
+
+
+};
+
+enum Gender
+{
+    male,
+    female,
+    other,
+
+};
+
+class Person{
+
+    string name;
+    string email;
+    string contact;
+
+    public:
+    Person(string name, string email,string contact)
+    {
+        this->name=name;
+        this->email=email;
+        this->contact=contact;
+    }
+    
+    
+};
+
+class Passenger: public Person{
+    int age;
+    Gender gender;
+    
+
+    public:
+    Passenger(string name,string email, string contact, int age, int gender):Person(name,email, contact)
+    {
+        this->age=age;
+        
+    }
+
+};
+
+class User:public Person{
+
+    string userId;
+    string userName;
+    string password;
+
+    public:
+
+    Booking* bookFlight();
+
+    bool cancelbooking(Booking* booking);
+
+    vector<Flight*> searchFlight(Date date, string source, string destination);
+
+
+};
+
+class Admin{
+
+    string adminId;
+
+    public:
+
+    Airline* addAirline(string airlineName);
+    Aircraft* addAircraft();
+    Flight* addFlight();
+    bool cancelPreFlight();
+
+
+};
+
+enum PaymentMode{
+    cash,
+    card,
+    UPI,
+
+};
+
+enum PaymentStatus
+{
+    pending,
+    successful,
+    failed,
+};
+
+class Payment{
+
+    string paymentId;
+    PaymentMode paymentMode;
+    double amount;
+    PaymentStatus paymentStatus;
+
+    
+};
+
+enum BookingStatus{
+    success,
+    fail,
+};
+
+class Booking{
+    string bookingId;
+    User user;
+    vector<Flight*> flightsBooked;
+    Date dateOfBooking;
+    Payment payment;
+    BookingStatus bookingStatus;
+    vector<Passenger*> listOfPassengers;
+    vector<Seat*>  listOfBookedSeats;
+};
+
+class Pilot:public Person{
+    string empId;
+    Airline airline;
+
+};
+
+class Crew:public Person{
+
+    string empId;
+    Airline airline;
+
+};
+
+
+
+
+
