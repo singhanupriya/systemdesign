@@ -1,0 +1,240 @@
+
+
+
+/*
+
+We will be designing a system with the following requirements:
+Users should be able to add new products to sell.
+Users should be able to search for products by their name or category.
+Users can search and view all the products, but they will have to become a registered member to buy a product.
+Users should be able to add/remove/modify product items in their shopping cart.
+Users can check out and buy items in the shopping cart.
+Users can rate and add a review for a product.
+The user should be able to specify a shipping address where their order will be delivered.
+Users can cancel an order if it has not shipped.
+Users should get notifications whenever there is a change in the order or shipping status.
+Users should be able to pay through credit cards or electronic bank transfer.
+Users should be able to track their shipment to see the current state of their order.
+
+*/
+
+#include<iostream>
+#include<vector>
+
+using namespace std;
+
+class Product;
+class User;
+
+class Amazon{
+
+    static vector<Product*> listOfProducts;
+    static vector<User*> listOfUsers;
+
+    public:
+
+    static vector<Product*> getProductsByName(string productName);
+    static vector<Product*> getProductByCategory(int category);
+    static vector<User*> getUsers();
+    static void notif();
+
+};
+
+vector<Product*> Amazon::listOfProducts;
+vector<User*> Amazon::listOfUsers;
+
+enum Availability{
+    inStock,
+    outOfStock,
+
+};
+
+enum Category{
+    food,
+    clothing,
+    essential,
+
+};
+
+
+class ProductRating{
+    string review;
+    string username;
+    int rating;
+
+};
+
+class Product{
+
+    string productID;
+    string productName;
+    string productManufacturer;
+   
+    Availability productAvailability;
+    double productPrice;
+    Category productCategory;
+    vector<ProductRating*> productRating;
+    
+    bool returnAvailable;
+    bool exchangeAvailable;
+
+};
+
+class People{
+
+    string firstName;
+    string secondName;
+
+};
+
+class Admin:public People{
+
+    string empId;
+    string emailId;
+    string contact;
+
+    public:
+
+    void addProduct();
+   
+
+};
+
+
+
+class Guest:public People{
+    string emailId;
+    
+
+    public:
+
+    void searchProduct();
+
+
+
+
+};
+
+class Item{
+    Product* product;
+    int quantity;
+
+};
+
+class ShoppingCart{
+
+    vector<Item*> listOfItemsInCart;
+
+    public:
+
+    void addToCart(Item item);
+    void removeFromCart(Item item);
+    double getCartValue();
+    void modifyCart(Item item);
+    vector<Item*> getItemsInCart();
+
+};
+
+class RegisteredUser:public People{
+
+    string registeredUserId;
+    string emailId;
+    string password;
+    string contact;
+    ShoppingCart* shoppingCart;
+
+    public:
+
+    void addProduct(string productId);
+
+    void removeProduct(string productId);
+
+    void modifyProduct(string productId);
+
+    void rateProduct(string productId);
+
+    
+
+    BookingOrder* buyCart();
+
+    bool cancelOrder(BookingOrder* booking);
+
+    void trackOrder(BookingOrder* booking);
+
+
+};
+
+class ShippingAddress{
+
+    People people;
+    string contact;
+    string street;
+    string city;
+    string state;
+    string country;
+    int pincode;
+
+};
+
+class Date{
+    int day;
+    int month;
+    int year;
+
+};
+
+enum PaymentMethod
+{
+    cash,
+    card,
+    UPI,
+};
+
+enum PaymentStatus{
+    success,
+    failed,
+    pending,
+
+};
+
+class Payment{
+    string transactionId;
+    PaymentMethod paymentMethod;
+    PaymentStatus paymentStatus;
+    Date date;
+    double amount;
+
+};
+
+enum BookingStatus{
+    success,
+    failed,
+
+};
+
+enum TrackingStatus{
+    onTime,
+    delayed,
+    beforeTime,
+
+};
+
+class NotificationService{
+//work on this
+
+};
+
+class BookingOrder{
+
+    RegisteredUser* user;
+    ShippingAddress address;
+    Date date;
+    Payment payment;
+    BookingStatus bookingStatus;
+    TrackingStatus trackingStatus;
+    Date estimatedDateOfArrival;
+    NotificationService notificationService;
+    
+
+
+};
