@@ -1,0 +1,148 @@
+https://www.youtube.com/watch?v=XihyLU6MhzY&t=18s
+Code impementation: https://www.bogotobogo.com/DesignPatterns/decorator.php
+
+
+Intent
+Attach additional responsibilities to an object dynamically. 
+Decorators provide flexible alternatives to subclassing for extending functionality.
+
+/******************************************************************************
+
+Welcome to GDB Online.
+GDB online is an online compiler and debugger tool for C, C++, Python, Java, PHP, Ruby, Perl,
+C#, OCaml, VB, Swift, Pascal, Fortran, Haskell, Objective-C, Assembly, HTML, CSS, JS, SQLite, Prolog.
+Code, Compile, Run and Debug online from anywhere in world.
+
+*******************************************************************************/
+#include <iostream>
+
+
+using namespace std;
+
+
+class Window{
+    
+    public:
+    
+    //abstract fns to be overridden by child
+    virtual void draw()=0;
+    virtual string getDescription()=0;
+    
+};
+
+//concrete class
+class SimpleWindow: public Window{
+    
+    public:
+    
+    void draw()
+    {
+        cout<<"This is a simple window\n";
+    }
+    
+    string getDescription()
+    {
+        return "Simple Window";
+    }
+    
+};
+
+//Decorator abs class
+class WindowDecorator: public Window{
+    
+    protected:
+    
+    Window* m_decoratedWindow;
+    
+    public:
+    
+    WindowDecorator(Window* decoratedWindow)
+    {
+        m_decoratedWindow=decoratedWindow;
+    }
+    
+};
+
+//Decorator concrete class
+
+class VerticalScrollDecorator: public WindowDecorator{
+    
+    public:
+    VerticalScrollDecorator(Window* decoratedWindow):WindowDecorator(decoratedWindow)
+    {
+        
+    }
+    
+    
+    void draw()
+    {
+        cout<<"This is a vertical window";
+        m_decoratedWindow->draw();
+        
+    }
+    
+    string getDescription()
+    {
+        return m_decoratedWindow->getDescription()+ " with vertical bars\n";
+    }
+};
+
+
+class HorizontalScrollDecorator: public WindowDecorator{
+    
+    public:
+    HorizontalScrollDecorator(Window* decoratedWindow):WindowDecorator(decoratedWindow)
+    {
+        
+    }
+    
+    
+    void draw()
+    {
+        cout<<"This is a horizontal window";
+        m_decoratedWindow->draw();
+        
+    }
+    
+    string getDescription()
+    {
+        return m_decoratedWindow->getDescription()+ " with horizontal bars\n";
+    }
+};
+
+
+
+
+
+int main()
+{
+    
+    Window* simple= new SimpleWindow();
+    
+    cout<<simple->getDescription()<<endl;
+    
+    
+    
+    Window* horiWindow=new HorizontalScrollDecorator(simple);
+    cout<<horiWindow->getDescription()<<endl;
+    
+    
+    Window* verWindow=new VerticalScrollDecorator(simple);
+    cout<<verWindow->getDescription()<<endl;
+    
+    Window* decoratedWindow=new HorizontalScrollDecorator(new VerticalScrollDecorator(simple));
+    cout<<decoratedWindow->getDescription()<<endl;
+    
+
+    return 0;
+}
+
+
+Output:
+1. Simple Window
+2. Simple Window with horizontal bars
+
+3. Simple Window with vertical bars
+
+4. Simple Window with vertical bars
+ with horizontal bars
