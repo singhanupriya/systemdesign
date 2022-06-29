@@ -133,6 +133,9 @@ int main()
     Window* decoratedWindow=new HorizontalScrollDecorator(new VerticalScrollDecorator(simple));
     cout<<decoratedWindow->getDescription()<<endl;
     
+    Window* nestedWindow=new HorizontalScrollDecorator(verWindow);
+    cout<<nestedWindow->getDescription();
+    
 
     return 0;
 }
@@ -145,4 +148,7 @@ Output:
 3. Simple Window with vertical bars
 
 4. Simple Window with vertical bars
+ with horizontal bars
+ 
+ 5. 4. Simple Window with vertical bars
  with horizontal bars
