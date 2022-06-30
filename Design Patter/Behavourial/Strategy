@@ -1,0 +1,170 @@
+https://www.youtube.com/watch?v=Nx8iUv-ZnPw&t=1074
+Implementation: https://www.bogotobogo.com/DesignPatterns/strategy.php
+
+
+
+#include <iostream>
+
+using namespace std;
+
+/*
+Interface1:
+            SortBehavior(abs) -> conc classes will have diff behavior of sort
+            1. Merge (conc)
+            2. Heap  (conc)
+            3. Quick (conc)
+            
+Interface2: 
+            SearchBehavior(abs) -> conc classes will have diff behavior of sort
+            1. Binary (conc)
+            2. Linear(conc)
+            3. Hash (conc)
+            
+Main class which will compose these two interfaces and decide which fn they want to 
+implement of these interfaces.
+
+*/
+
+
+//Interface 1
+class SortBehaviour{
+    
+    public:
+    virtual void sort()=0;
+    
+};
+
+class Merge:public SortBehaviour{
+    
+    public:
+    void sort()
+    {
+        cout<<"Merge sort\n";
+    }
+    
+};
+
+
+class Heap:public SortBehaviour{
+    
+    public:
+    void sort()
+    {
+        cout<<"Heap sort\n";
+    }
+    
+};
+
+
+class Quick:public SortBehaviour{
+    
+    public:
+    void sort()
+    {
+        cout<<"Quick sort\n";
+    }
+    
+};
+
+
+//Interface 2 
+class SearchBehavior
+{
+    public:
+    virtual void search()=0;
+    
+};
+
+class Binary: public SearchBehavior{
+    public:
+    void search()
+    {
+        cout<<"Binary Search\n";
+    }
+    
+};
+
+class Linear: public SearchBehavior{
+    public:
+    void search()
+    {
+        cout<<"Linear Search\n";
+    }
+    
+};
+
+class Hash: public SearchBehavior{
+    public:
+    void search()
+    {
+        cout<<"Hash Search\n";
+    }
+    
+};
+
+
+//Main class
+class Context{
+    
+    private:
+    SearchBehavior* m_search;
+    SortBehaviour* m_sort;
+    
+    public:
+    Context()
+    {
+        
+    }
+    
+    //Not included these in the constructor as they dont necessarily as to use these fnality.
+    void set_search(SearchBehavior* s)
+    {
+        m_search=s;
+    }
+    
+    void set_sort(SortBehaviour* s)
+    {
+        m_sort=s;
+    }
+    
+    void sort()
+    {
+        m_sort->sort();
+    }
+    
+    void search()
+    {
+        m_search->search();
+    }
+    
+    
+    
+};
+
+
+
+int main()
+{
+    
+    Merge* merge=new Merge();
+    Heap* heap=new Heap();
+    Quick* quick=new Quick();
+    
+    Binary* binary=new Binary();
+    Linear* linear=new Linear();
+    Hash* hash=new Hash();
+    
+    Context* context=new Context();
+    context->set_sort(heap);
+    context->set_search(binary);
+    
+    
+    context->search();
+    context->sort();
+
+    return 0;
+}
+
+Output:
+Binary Search
+Heap sort
