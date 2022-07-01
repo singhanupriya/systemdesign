@@ -1,0 +1,97 @@
+https://www.youtube.com/watch?v=atG1o9m-Y-Y&list=PLRnuLZZ5D0Kzz1oWyvIxz8RSjMRIjzgK6&index=10
+Code: https://www.bogotobogo.com/DesignPatterns/facade.php
+
+
+Provide a unified interface to a set of interfaces in a subsystem. Facade defines a higher-level interface that makes the subsystem easier to use.
+Façade pattern is different from adapter pattern because façade simplifies a class structure while adapter keeps the same class structure.
+
+The Façade pattern is a way to structure our API into subsystems to reduce ever growing size and complexity of interfaces of API.
+
+
+
+#include <iostream>
+
+using namespace std;
+
+
+class SubSystemOne{
+    
+    public:
+    void methodOne()
+    {
+        cout<<"Subsystem One\n";
+    }
+    
+};
+
+class SubSystemTwo{
+    
+    public:
+    void methodTwo()
+    {
+        cout<<"Subsystem Two\n";
+    }
+    
+};
+
+class SubSystemThree{
+    
+    public:
+    void methodThree()
+    {
+        cout<<"Subsystem Three\n";
+    }
+    
+};
+
+class ComplexSystemFacade{
+    
+    private:
+    SubSystemOne* one;
+    SubSystemTwo* two;
+    SubSystemThree* three;
+    
+    public:
+    
+    ComplexSystemFacade()
+    {
+        one= new SubSystemOne();
+        two =new SubSystemTwo();
+        three=new SubSystemThree();
+    }
+    
+    void methodA()
+    {
+        cout<<"Facade method A\n";
+        one->methodOne();
+        three->methodThree();
+    }
+    
+    void methodB()
+    {
+        cout<<"Facade method B\n";
+        two ->methodTwo();
+        one->methodOne();
+    }
+    
+};
+
+int main()
+{
+    ComplexSystemFacade* f=new ComplexSystemFacade();
+    
+    f->methodA();
+    f->methodB();
+
+    return 0;
+}
+
+
+Output:
+
+Facade method A
+Subsystem One
+Subsystem Three
+Facade method B
+Subsystem Two
+Subsystem One
