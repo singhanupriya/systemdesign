@@ -1,0 +1,350 @@
+
+https://www.youtube.com/watch?v=Hb6WePtPQhg&list=PL12BCqE-Lp650Cg6FZW7SoZwN8Rw1WJI7&index=2
+https://drive.google.com/file/d/1GFDk4DBOtefSbuUioAQ5D3T2-cH9m47l/view
+
+//Notification system pending
+
+
+
+/*
+
+The system should support the booking of different room types like standard, deluxe, family suite, etc.
+
+Guests should be able to search the room inventory and book any available room.
+
+The system should be able to retrieve information, such as who booked a particular room, or what rooms were booked by a specific customer.
+
+The system should allow customers to cancel their booking - and provide them with a full refund if the cancelation occurs before 24 hours of the check-in date.
+
+The system should be able to send notifications whenever the booking is nearing the check-in or check-out date.
+
+The system should maintain a room housekeeping log to keep track of all housekeeping tasks.
+
+Any customer should be able to add room services and food items.
+
+Customers can ask for different amenities.
+
+The customers should be able to pay their bills through credit card, check or cash.
+
+*/
+
+
+#include<iostream>
+#include<vector>
+#include<unordered_map>
+
+using namespace std;
+
+class Address;
+class Room;
+class Booking;
+class Guest;
+class HouseKeeping;
+
+class Address{
+
+    string street;
+    string town;
+    string city;
+    string state;
+    string country;
+    int pincode;
+
+};
+
+class Hotel{
+    string hotelId;
+    string hotelName;
+    Address hotelAddress;
+    vector<Room*> listOfRooms;
+    //unordered_map<Guest*,vector<Room*>> bookingPerGuest;
+    vector<Booking*> listOfBooking;
+
+    public:
+
+    vector<Room*> getRooms();
+
+    
+
+};
+
+
+
+enum RoomStatus{
+    Available,
+    Booked,
+    NotAvailable,
+
+};
+
+class Room{
+
+   
+
+    string roomId;
+    RoomStatus roomStatus;
+    Guest* guest;
+    HouseKeeping* houseKeeping;
+     protected:
+    int cost;
+    
+    
+
+    public:
+
+    virtual void setCost(int cost)=0;
+
+    virtual int getRoomPrice()=0;
+    
+
+};
+
+class StandardRoom:public Room{
+
+    
+    public:
+
+
+
+    void getRoomDescription()
+    {
+        cout<<"Standard Room\n";
+    }
+    void setCost(int cost)
+    {
+        this->cost=cost;
+    }
+
+    int getRoomPrice()
+    {
+        return cost;
+    }
+
+};
+
+class DeluxeRoom:public Room{
+
+    public:
+    void getRoomDescription()
+    {
+        cout<<"Deluxe Room\n";
+    }
+    void setCost(int cost)
+    {
+        this->cost=cost;
+    }
+
+    int getRoomPrice()
+    {
+        return cost;
+    }
+
+};
+
+class FamilySuiteRoom:public Room{
+
+    public:
+    void getRoomDescription()
+    {
+        cout<<"Family Suite\n";
+    }
+
+    void setCost(int cost)
+    {
+        this->cost=cost;
+    }
+
+    int getRoomPrice()
+    {
+        return cost;
+    }
+
+};
+
+class RoomDecorator:public Room{
+    protected:
+    Room* room;
+
+    public:
+    RoomDecorator(Room* room)
+    {
+        this->room=room;
+    }
+
+};
+
+class LaundryDecortor: public RoomDecorator{
+
+    public:
+    LaundryDecortor(Room* room):RoomDecorator(room)
+    {
+
+    }
+
+    void setCost(int cost)
+    {
+        this->cost=cost;
+    }
+
+    int getRoomPrice()
+    {
+        return cost + room->getRoomPrice();
+    }
+
+};
+
+class SpaDecortor: public RoomDecorator{
+
+    public:
+    SpaDecortor(Room* room):RoomDecorator(room)
+    {
+
+    }
+
+    void setCost(int cost)
+    {
+        this->cost=cost;
+    }
+
+    int getRoomPrice()
+    {
+        return cost + room->getRoomPrice();
+    }
+
+};
+
+
+class Person{
+    string name;
+    string email;
+    string contact;
+
+};
+
+class Guest:public Person{
+    string userId;
+    string govtId;
+    vector<Room*> roomsBooked;
+
+    public:
+
+    vector<Room*> getAllRoomsBooked();
+
+    Booking* bookRoom(string roomName, Guest* guest);
+    
+    bool cancelBooking(string bookingId);
+
+    
+
+};
+
+class Receptionist:public Person{
+    string empId;
+
+    public:
+
+    Guest* addGuest();
+    Booking* bookRoomForGuest(Room* room,Guest* guest);
+
+};
+
+class HouseKeeper:public Person{
+    string empId;
+
+};
+
+class Time{
+    int hour;
+    int min;
+    int sec;
+
+};
+
+class Date{
+    int day;
+    int month;
+    int year;
+
+};
+
+class Task{
+    string taskId;
+    string taskName;
+
+};
+
+class HouseKeeping{
+    HouseKeeper houseKeeper;
+    Time timestamp;
+    Date date;
+    string houseKeepingLog;
+    string roomId;
+    Task task;
+
+
+
+};
+
+enum BookingStatus{
+    Success,
+    Fail,
+    Processing,
+
+};
+
+enum PaymentMode{
+    cash,
+    card,
+    UPI,
+
+};
+
+enum PaymentStatus{
+    sucess,
+    failed,
+    pending,
+
+};
+
+class Payment{
+
+    string transactionId;
+    double amount;
+    PaymentMode paymentMode;
+    PaymentStatus paymentStatus;
+    Time timeOfPayment;
+    Date dateOfPayment;
+
+};
+
+
+class Booking{
+
+    string bookingId;
+    Guest* primaryGuest;
+    vector<Guest*> occupants;
+    Date dateOfBooking;
+    Time timeOfBooking;
+    Date checkin;
+    Date checkout;
+    vector<Room*> roomsBooked;
+    BookingStatus bookingStatus;
+    Payment payment;
+
+};
+
+
+int main()
+{
+    Room* family=new FamilySuiteRoom();
+    family->setCost(2500);
+
+    SpaDecortor* spa=new SpaDecortor(family);
+    spa->setCost(500);
+    cout<<spa->getRoomPrice();
+
+
+    return 0;
+}
+
+
