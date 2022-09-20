@@ -1,15 +1,28 @@
+Notes:
+
+1. Singleton is a creational design pattern that lets you ensure that a class has only one instance, while providing a global access point to this instance.
+2. Why needed? control access to some shared resource—for example, a database or a file.
+
+The Singleton pattern solves two problems at the same time, violating the Single Responsibility Principle:
+a. Ensure that a class has just a single instance. 
+b. Provide a global access point to that instance. 
+
+1, Make the constructor private so that objs can't create an instance
+2. SInce u have made the constructor private, u will need some method to return an instance of this class, for this we use a static fn which returns a 
+    static instance of this class
+
+
+
+
+
+
+
+
 U want only one instance of Logger class to be created
 
 Step 1: You want only one instance of ur class, if u give the power to the user they can create any number of instances.
 
-/******************************************************************************
 
-Welcome to GDB Online.
-GDB online is an online compiler and debugger tool for C, C++, Python, Java, PHP, Ruby, Perl,
-C#, VB, Swift, Pascal, Fortran, Haskell, Objective-C, Assembly, HTML, CSS, JS, SQLite, Prolog.
-Code, Compile, Run and Debug online from anywhere in world.
-
-*******************************************************************************/
 #include <iostream>
 
 using namespace std;
@@ -179,7 +192,7 @@ User 1
 User2
 
 
-Step 4: Double-check lock as mutex is expensive we want lock only when the instance is not created
+Step 4: Double-check lock as mutex is expensive we want lock only when the instance is not created.
 
 
 /******************************************************************************
