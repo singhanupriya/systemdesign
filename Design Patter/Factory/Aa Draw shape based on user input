@@ -2,14 +2,11 @@ https://www.youtube.com/watch?v=tv54FY48Vio&list=PLliXPok7ZonlZJuAN0hvUnf5ovFepj
 
 Takes user input shape and draw the shape.
 
-/******************************************************************************
 
-Welcome to GDB Online.
-GDB online is an online compiler and debugger tool for C, C++, Python, Java, PHP, Ruby, Perl,
-C#, VB, Swift, Pascal, Fortran, Haskell, Objective-C, Assembly, HTML, CSS, JS, SQLite, Prolog.
-Code, Compile, Run and Debug online from anywhere in world.
 
-*******************************************************************************/
+1.factory will take care of the class/obj creating logic and client will not be bothered. Now loosely coupled
+
+
 #include <iostream>
 
 using namespace std;
