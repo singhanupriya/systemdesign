@@ -1,0 +1,29 @@
+
+
+
+Client.cpp
+
+#include<iostream>
+#include "vehicle_factory.hpp"
+
+using namespace std;
+
+int main()
+{
+    string vehicleType;
+    cin>>vehicleType;
+
+    Vehicle* vehicle=VehicleFactory::getVehicle(vehicleType);
+    vehicle->createVehicle();
+
+
+    return 0;
+}
+
+
+anuprsi2@ANUPRSI2-M-G1NT Factory % g++ -o vehicleCleint *.cpp
+anuprsi2@ANUPRSI2-M-G1NT Factory % ./vehicleCleint
+bus
+This is a bus
+anuprsi2@ANUPRSI2-M-G1NT Factory % ./vehicleCleint
+car
