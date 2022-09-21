@@ -1,5 +1,17 @@
 https://www.youtube.com/watch?v=17i8a-pUtx8&list=PLliXPok7ZonlZJuAN0hvUnf5ovFepjxU0&index=6
 
+1. Abstract Factory is a creational design pattern that lets you produce families of **related objects** without specifying their concrete classes.
+2. create factories to create object
+    macfactory-mac button + mac scrollbar
+    windowsfactory- windowsfactory button + windowsfactory scrollbar
+    
+    
+    
+3. A family of related products, say: Chair + Sofa + CoffeeTable.
+Several variants of this family. For example, products Chair + Sofa + CoffeeTable are available in these variants: Modern, Victorian, ArtDeco.
+
+
+
 
 #include<iostream>
 
