@@ -1,0 +1,203 @@
+https://www.geeksforgeeks.org/chain-responsibility-design-pattern/
+http://coursegalaxy.com/design-patterns/chain-of-responsibility-cpp.html
+
+Chain of responsibility pattern is used to achieve loose coupling in software design where a request from the client is passed to a chain of objects 
+to process them. Later, the object in the chain will decide themselves who will be processing the request and 
+whether the request is required to be sent to the next object in the chain or not.
+
+Where and When Chain of Responsibility pattern is applicable : 
+ 
+
+When you want to decouple a request’s sender and receiver
+Multiple objects, determined at runtime, are candidates to handle a request
+When you don’t want to specify handlers explicitly in your code
+When you want to issue a request to one of several objects without specifying the receiver explicitly.
+
+How to send a request in the application using the Chain of Responsibility
+
+The Client in need of a request to be handled sends it to the chain of handlers which are classes that extend the Handler class. 
+Each of the handlers in the chain takes its turn trying to handle the request it receives from the client. 
+If ConcreteHandler1 can handle it, then the request is handled, if not it is sent to the handler ConcreteHandler2, the next one in the chain.
+
+
+IMP:
+
+ Please note that a request not handled at all by any handler is a valid use case.
+ 
+ #include <iostream>
+
+using namespace std;
+
+
+class Handler{
+    
+    protected:
+    
+    Handler* successor;
+    
+    public:
+    
+    
+    
+    Handler()
+    {
+        successor=nullptr;
+    }
+    
+    virtual void handleRequest(int requestId)=0;
+    
+    void makeSuccessor(Handler* h)
+    {
+        successor=h;
+    }
+    
+};
+
+class ConcreteHandler1: public Handler{
+    
+    public:
+    
+    ConcreteHandler1()
+    {
+        cout<<"This is handler 1 being created\n";
+    }
+    
+    void handleRequest(int requestId)
+    {
+        if(requestId<5)
+        {
+            cout<<"Handler 1 is handling request "<<requestId<<endl;
+        }
+        else if(successor!=nullptr)
+        {
+            successor->handleRequest(requestId);
+        }
+    }
+    
+};
+
+class ConcreteHandler2: public Handler{
+    
+    public:
+    
+    ConcreteHandler2()
+    {
+        cout<<"This is handler 2 being created\n";
+    }
+    
+    void handleRequest(int requestId)
+    {
+        if(requestId<10)
+        {
+            cout<<"Handler 2 is handling request "<<requestId<<endl;
+        }
+        else if(successor!=nullptr)
+        {
+            successor->handleRequest(requestId);
+        }
+    }
+    
+};
+
+class ConcreteHandler3: public Handler{
+    
+    public:
+    
+    ConcreteHandler3()
+    {
+        cout<<"This is handler 3 being created\n";
+    }
+    
+    void handleRequest(int requestId)
+    {
+        if(requestId<15)
+        {
+            cout<<"Handler 3 is handling request "<<requestId<<endl;
+        }
+        else if(successor!=nullptr)
+        {
+            successor->handleRequest(requestId);
+        }
+    }
+    
+};
+
+// handle1 -----> handle2----->handle3
+
+int main()
+{
+    
+    Handler* handle1= new ConcreteHandler1();
+    Handler* handle2=new ConcreteHandler2();
+    Handler* handle3= new ConcreteHandler3();
+    
+    handle1->makeSuccessor(handle2);
+    handle2->makeSuccessor(handle3);
+    
+    handle1->handleRequest(3);
+    
+    cout<<endl;
+    
+    handle1-> handleRequest(6); //here u can pass the start point, the chain will start from here
+    
+    cout<<endl;
+    
+    handle1->handleRequest(13);
+    
+    cout<<endl;
+    
+    handle1->handleRequest(17);
+
+    return 0;
+}
+
+Output:
+This is handler 1 being created
+This is handler 2 being created
+This is handler 3 being created
+Handler 2 is handling request 3
+
+Handler 2 is handling request 6
+
+Handler 3 is handling request 13
+
+Another variation///// start point is hanlder 2
+
+
+
+int main()
+{
+    
+    Handler* handle1= new ConcreteHandler1();
+    Handler* handle2=new ConcreteHandler2();
+    Handler* handle3= new ConcreteHandler3();
+    
+    handle1->makeSuccessor(handle2);
+    handle2->makeSuccessor(handle3);
+    
+    handle2->handleRequest(3);
+    
+    cout<<endl;
+    
+    handle2-> handleRequest(6);
+    
+    cout<<endl;
+    
+    handle1->handleRequest(13);
+    
+    cout<<endl;
+    
+    handle1->handleRequest(17);
+
+    return 0;
+}
+
+Output:
+This is handler 1 being created
+This is handler 2 being created
+This is handler 3 being created
+Handler 2 is handling request 3
+
+Handler 2 is handling request 6
+
+Handler 3 is handling request 13
