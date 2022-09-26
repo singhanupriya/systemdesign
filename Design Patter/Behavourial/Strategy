@@ -1,7 +1,8 @@
 https://www.youtube.com/watch?v=Nx8iUv-ZnPw&t=1074
 Implementation: https://www.bogotobogo.com/DesignPatterns/strategy.php
 
-In Strategy pattern, a class behavior or its algorithm can be changed at run time based on the requirement. Whatever is changing, take it out.
+In Strategy pattern, a class behavior or its algorithm can be changed at run time based on the requirement. Whatever is changing, take it out. 
+Since sort behaviour was changing, we made an abs class and made diff behaviours as concrete, now at run it selectd which behaviour to take.
 
 #include <iostream>
 
