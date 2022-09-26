@@ -1,7 +1,7 @@
 https://www.youtube.com/watch?v=Nx8iUv-ZnPw&t=1074
 Implementation: https://www.bogotobogo.com/DesignPatterns/strategy.php
 
-In Strategy pattern, a class behavior or its algorithm can be changed at run time based on the requirement
+In Strategy pattern, a class behavior or its algorithm can be changed at run time based on the requirement. Whatever is changing, take it out.
 
 #include <iostream>
 
@@ -22,6 +22,8 @@ Interface2:
             
 Main class which will compose these two interfaces and decide which fn they want to 
 implement of these interfaces.
+
+At run time it is decided, which sorting behaviour u want to use.
 
 */
 
