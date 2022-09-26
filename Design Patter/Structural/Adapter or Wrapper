@@ -1,4 +1,5 @@
 https://www.codeproject.com/Tips/595716/Adapter-Design-Pattern-in-Cplusplus
+https://www.geeksforgeeks.org/adapter-pattern/?ref=lbp
 
 Structural design patterns are concerned with how classes and objects can be composed, to form larger structures.
 The structural design patterns simplifies the structure by identifying the relationships.
@@ -17,6 +18,102 @@ Adapter class: This class is a wrapper class which implements the desired target
 Adaptee class: This is the class which is used by the Adapter class to reuse the existing functionality and modify them for desired use.
 Client: This class will interact with the Adapter class.
 
+
+Suppose you have a Bird class with fly() , and chirp()methods. 
+And also a Duck class with squeak() method. 
+Let’s assume that you are short on Duck objects and you would like to use Bird objects in their place. 
+Birds have some similar functionality but implement a different interface, so we can’t use them directly. 
+So we will use adapter pattern. Here our client would be Duck and adaptee would be Bird.
+
+#include <iostream>
+
+using namespace std;
+
+class Bird{
+    
+    public:
+    
+    virtual void fly()=0;
+    virtual void chirp()=0;
+    
+};
+
+class Sparrow: public Bird{
+    
+    public:
+    
+    void fly()
+    {
+        cout<<"Flying\n";
+    }
+    
+    void chirp()
+    {
+        cout<<"Chirping\n";
+    }
+    
+};
+
+
+class Duck{
+    
+    public:
+    
+    virtual void squeak()=0;
+    
+};
+
+class ToyDuck: public Duck{
+    
+    public:
+    
+    void squeak()
+    {
+        cout<<"Squeak\n";
+    }
+    
+};
+
+
+//Now u are short of toyducks and want to use bird class as a toyducks
+
+class BirdAdapter: public Duck{
+    
+    Bird* bird;
+    
+    public:
+    
+    BirdAdapter(Bird* bird)
+    {
+        this->bird=bird;
+    }
+    
+    void squeak()
+    {
+        bird->chirp();
+    }
+    
+};
+
+int main()
+{
+    Bird* sparrow=new Sparrow();
+    sparrow->chirp();
+    
+    Duck* duck=new ToyDuck();
+    duck->squeak();
+    
+    Duck* newDuck=new BirdAdapter(sparrow);
+    newDuck->squeak();
+
+    return 0;
+}
+
+Output:
+
+Chirping
+Squeak
+Chirping
 
 Eg-> The user wants to draw a rectangle passing x,y,width and height but we have a legacy class that expects coords (x1,y1,x2,y2) we need to convert this 
 legacy class into a class as per user requirements.
