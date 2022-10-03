@@ -1,0 +1,416 @@
+
+#include<iostream>
+#include<mutex>
+#include<vector>
+
+
+using namespace std;
+
+class LogManager;
+class LogHandler;
+class ErrorHandler;
+class InfoHandler;
+class DebugHandler;
+class Sink;
+
+
+class Logger{
+
+    static Logger* instance;
+    static mutex mtx;
+    static LogHandler* logChain;
+    static vector<Sink*> hearers;
+
+
+    Logger()
+    {
+        cout<<"Logger created\n";
+    }
+
+    public:
+
+    static Logger* createLogger();
+
+    void error(string msg);
+
+    void info(string msg);
+
+    void debug(string msg);
+    
+    
+
+};
+
+
+Logger* Logger::instance=nullptr;
+mutex Logger::mtx;
+LogHandler* Logger::logChain;
+vector<Sink*> Logger::hearers;
+
+
+
+
+
+/*
+
+*/
+
+
+
+
+//create levels on logging  INFO->ERROR->DEBUG
+
+/*
+    Level 1-> means all info, error and debug
+    Level 2->info and erro
+    Level 3-> error
+
+*/
+
+class LogHandler{
+
+    protected:
+
+    LogHandler* successor;
+    
+    //int level;
+
+    public:
+
+    LogHandler()
+    {
+        successor=nullptr;
+    }
+
+    void setSuccessor(LogHandler* succ)
+    {
+        successor=succ;
+    }
+
+    
+
+    virtual void printLog(int level,string msg)=0;
+
+};
+
+class ErrorHandler:public LogHandler{
+
+    //vector<Sink*> errorDest;
+
+    public:
+
+    ErrorHandler()
+    {
+        cout<<"Error Handler created\n";
+    }
+
+    
+
+    void printLog(int level,string msg)
+    {
+        if(level<=3)
+        {
+            cout<<"ERROR: "<<msg<<endl;
+            
+            
+                
+
+            
+                
+        }
+        if(successor!=nullptr)
+        {
+            successor->printLog(level,msg);
+        }
+    }
+
+
+};
+
+class InfoHandler:public LogHandler{
+
+    public:
+
+    InfoHandler()
+    {
+        cout<<"Info Handler created\n";
+    }
+
+    void printLog(int level,string msg)
+    {
+        if(level<=2)
+        {
+            cout<<"INFO: " <<msg<<endl;
+        }
+        if(successor!=nullptr)
+        {
+            successor->printLog(level,msg);
+        }
+    }
+
+
+};
+
+class DebugHandler:public LogHandler{
+
+    public:
+
+    DebugHandler()
+    {
+        cout<<"Debug Handler created\n";
+    }
+
+    void printLog(int level,string msg)
+    {
+        if(level<=1)
+        {
+            cout<<"DEBUG: " <<msg<<endl;
+        }
+        if(successor!=nullptr)
+        {
+            successor->printLog(level,msg);
+        }
+    }
+
+
+};
+
+//create sink
+
+class Sink{
+
+    public:
+
+    virtual void notify(string msg)=0;
+    
+
+};
+
+class Console:public Sink{
+    public:
+
+    Console()
+    {
+        cout<<"Console created\n";
+    }
+
+    void notify(string msg)
+    {
+        cout<<" Console Log: "<<msg<<endl;
+    }
+
+};
+
+class Database:public Sink{
+    public:
+
+    Database()
+    {
+        cout<<"Database created\n";
+    }
+
+    void notify(string msg)
+    {
+        cout<<" Database Log: "<<msg<<endl;
+    }
+
+};
+
+class File:public Sink{
+    public:
+
+    File()
+    {
+        cout<<"File created\n";
+    }
+
+    void notify(string msg)
+    {
+        cout<<" File Log: "<<msg<<endl;
+    }
+
+};
+
+class LogManager{
+
+    public:
+
+    
+
+    static LogHandler* createLoggingLevel();
+    static vector<Sink*> createObservers();
+    
+    
+
+};
+
+LogHandler* LogManager::createLoggingLevel()
+{   
+    LogHandler* errorLog=new ErrorHandler();
+    LogHandler* infoLog=new InfoHandler();
+    LogHandler* debugLog=new DebugHandler();
+
+    errorLog->setSuccessor(infoLog);
+    infoLog->setSuccessor(debugLog);
+
+    return errorLog;
+
+}
+
+class Publisher{
+
+    
+    public:
+
+    static vector<Sink*> observers;
+
+
+    static void addToList(Sink* s);
+    
+
+    static void notify(string msg);
+    
+
+    static vector<Sink*> getList();
+    
+
+
+};
+
+vector<Sink*> Publisher::observers;
+void Publisher::addToList(Sink* s)
+{
+    observers.push_back(s);
+}
+
+void Publisher::notify(string msg)
+{
+    for(int i=0;i<observers.size();i++)
+    {
+        observers[i]->notify(msg);
+    }
+}
+
+vector<Sink*> Publisher::getList()
+{
+    return observers;
+}
+
+
+
+
+
+
+
+
+
+
+vector<Sink*> LogManager::createObservers()
+{
+    
+    Sink* console=new Console();
+    Sink* file=new File();
+    Sink* database=new Database();
+    Publisher::addToList(console);
+    Publisher::addToList(file);
+    Publisher::addToList(database);
+    vector<Sink*> observers=Publisher::getList();
+
+    return observers;
+
+}
+
+Logger* Logger::createLogger()
+{
+    if(instance==nullptr)
+    {
+        mtx.lock();
+        if(instance==nullptr)
+        {
+            instance=new Logger();
+            
+            logChain=LogManager::createLoggingLevel();
+            hearers=LogManager::createObservers();
+        }
+        mtx.unlock();
+    }
+    
+
+    return instance;
+}
+
+void Logger::error(string msg)
+{
+    logChain->printLog(3,msg);
+
+    for(int i=0;i<hearers.size();i++)
+    {
+        hearers[i]->notify(msg);
+    }
+
+}
+
+void Logger::info(string msg)
+{
+    logChain->printLog(2,msg);
+    for(int i=0;i<hearers.size();i++)
+    {
+        hearers[i]->notify(msg);
+    }
+}
+
+void Logger::debug(string msg)
+{
+    logChain->printLog(1,msg);
+    for(int i=0;i<hearers.size();i++)
+    {
+        hearers[i]->notify(msg);
+    }
+}
+
+
+int main()
+{
+    Logger* logger=Logger::createLogger();
+    logger->error("Hello\n");
+    logger->debug("Hi");
+
+    
+
+
+   
+
+    
+
+    return 0;
+}
+
+Output:
+
+anuprsi2@ANUPRSI2-M-G1NT Logger % cd "/Users/anuprsi2/Desktop/c++/Interview LLD/Logger/" && g++ logger.cpp -o logger && "/Users/anuprsi2/Deskto
+p/c++/Interview LLD/Logger/"logger
+Logger created
+Error Handler created
+Info Handler created
+Debug Handler created
+Console created
+File created
+Database created
+ERROR: Hello
+
+ Console Log: Hello
+
+ File Log: Hello
+
+ Database Log: Hello
+
+ERROR: Hi
+INFO: Hi
+DEBUG: Hi
+ Console Log: Hi
+ File Log: Hi
+ Database Log: Hi
+
+
+
+Patterns used: Chain of responsibility, Singleton, Observer
