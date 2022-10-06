@@ -1,0 +1,16 @@
+http://coursegalaxy.com/design-patterns/state.html
+https://www.youtube.com/watch?v=wOXs5Z_z0Ew
+
+Problem
+
+Object has different states and has to respond differently based on its current state.
+Handling of changes of behavior, based on state changes has to be run-time and using conditions for it will make the design complex and inflexible.
+
+Solution
+
+Have a separate abstract class for State, derive concrete class for each state and do the operation as required in overridden methods.
+Thus a separate class is required for different state, so that appropriate state object can be used based on the current state of object.
+
+1. U create a state abstract class which has all operations allowed on the product.
+2. Now different concrete states class will inherit abstract class and will implement the operation needed in that state and throw exception or have 
+default behaviour for remaining operations.
