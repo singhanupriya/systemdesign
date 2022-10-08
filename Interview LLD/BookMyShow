@@ -1,0 +1,468 @@
+
+
+#include<iostream>
+#include<vector>
+#include<unordered_map>
+
+
+using namespace std;
+class Theatre;
+class Show;
+class Hall;
+class Seat;
+
+class Movie;
+
+class User{
+
+    int userId;
+    string userName;
+
+    public:
+
+    void setUserName(string name)
+    {
+        this->userName=name;
+    }
+
+    string getUserName()
+    {
+        return this->userName;
+    }
+
+};
+
+class Location{
+
+    string city;
+    string country;
+    int pincode;
+
+    public:
+
+    void setCity(string city)
+    {
+        this->city=city;
+    }
+
+    string getCity()
+    {
+        return this->city;
+    }
+
+};
+
+class MovieController{
+
+    vector<Movie*> movieList;
+    unordered_map<Location*,vector<Movie*>> MoviePerCity;
+
+    public:
+
+    void addMovie(Movie* movie)
+    {
+        this->movieList.push_back(movie);
+    }
+
+    vector<Movie*> getMovieList()
+    {
+        return this->movieList;
+    }
+
+    void addMovieToLocation(Location* location, Movie* movie)
+    {
+        (this->MoviePerCity[location]).push_back(movie);
+    }
+
+    vector<Movie*> getMovieByLocation(Location* location)
+    {
+        return this->MoviePerCity[location];
+    }
+
+
+};
+
+//factory design patten for extendability
+
+class Event{
+
+    string eventId;
+    string eventName;
+    double duration;
+
+    public:
+
+    void setEventName(string name)
+    {
+        this->eventName=name;
+    }
+
+    string getEventName()
+    {
+        return this->eventName;
+    }
+
+};
+
+enum Genre{
+    horror,
+    comedy,
+    thriller,
+
+};
+
+class Movie:public Event{
+
+    Genre genre;
+    string directorName;
+    vector<Show*> showsOfMovie;
+    
+
+
+    public:
+
+    string setDirectorName(string name)
+    {
+        this->directorName=name;
+    }
+    
+
+
+};
+
+class EventFactory{
+
+    public:
+
+    static Event* createEvent(string eventName)
+    {
+        Event* event;
+        if(eventName=="movie")
+        {
+            event=new Movie();
+        }
+
+        return event;
+    }
+
+};
+
+class Theatre{
+
+    string theatreId;
+    string theatreName;
+    vector<Hall*> theatreHalls;
+    vector<Show*> theatreShows;
+
+    public:
+
+    Theatre(int id, string name)
+    {
+        this->theatreId=id;
+        this->theatreName=name;
+    }
+
+    string getTheatreName()
+    {
+        return this->theatreName;
+    }
+
+    vector<Show*> getTheatreShows()
+    {
+        return this->theatreShows;
+    }
+
+
+};
+
+enum SeatCategory{
+
+    regular,
+    exclusive,
+    premium,
+
+};
+
+class Seat{
+
+    int seatNumber;
+    SeatCategory seatCategory;
+    int seatPrice;
+
+    public:
+
+    Seat(int number, SeatCategory category)
+    {
+        this->seatNumber=number;
+        this->seatCategory=category;
+    }
+
+    void getSeatDetails()
+    {
+        cout<<this->seatNumber<<" "<<this->seatCategory<<endl;
+    }
+
+
+};
+
+class Hall{
+
+    string hallId;
+    int capacity;
+    vector<Seat*> hallSeats;
+
+    public:
+
+    string getHallID()
+    {
+        return this->hallId;
+    }
+
+    Hall(string id, int capacity)
+    {
+        this->hallId=id;
+        this->capacity=capacity;
+    }
+
+    void addSeatToHall(Seat* seat)
+    {
+        hallSeats.push_back(seat);
+    }
+
+    vector<Seat*> getSeatsPerHall()
+    {
+        return hallSeats;
+    }
+
+
+};
+
+class Time
+{
+    int hour;
+    int minute;
+    int second;
+};
+
+class EventShow{
+
+    string eventShowID;
+    string eventName;
+    Time startTime;
+    Time endTime;
+
+    public:
+
+    void setEventShowID(string id)
+    {
+        this->eventShowID=id;
+    }
+
+    string getEventShowID()
+    {
+        return this->eventShowID;
+    }
+
+    void setEventShowName(string name)
+    {
+        this->eventName=name;
+    }
+
+
+
+
+};
+
+class MovieShow:public EventShow{
+
+    
+    Movie* movie;
+    Hall* hall;
+    vector<Seat*> bookedSeats;
+
+    public:
+
+    void bookSeat(Seat* seat)
+    {
+        for(int i=0;i<bookedSeats.size();i++)
+        {
+            if(bookedSeats[i]==seat)
+            {
+                cout<<"Seat is already booked\n";
+                return ;
+            }
+        }
+
+        bookedSeats.push_back(seat);
+        cout<<"Your seat has been booked\n";
+        
+
+    }
+
+    void getShowDetails()
+    {
+        cout<<movie->getEventName() << "is shown  in"<<hall->getHallID()<<endl;
+    }
+
+};
+
+class EventShowFactory{
+
+    public:
+
+    EventShow* createEventShow(string showName)
+    {
+        EventShow* eventShow;
+
+        if(showName=="movieShow")
+        {
+            eventShow=new MovieShow();
+        }
+
+        return eventShow;
+    }
+
+};
+
+enum PaymentMode{
+    card,
+    cash,
+    UPI,
+};
+
+enum PaymentStatus{
+    success,
+    pending,
+    failed,
+
+};
+
+class Payment
+{
+    string paymentId;
+    Time timeOfPayment;
+    PaymentMode paymentMode;
+    PaymentStatus paymentStatus;
+
+    public:
+    
+    void completePayment(int amount);
+};
+
+enum BookingStatus
+{
+    success,
+    failed,
+};
+
+class Booking{
+
+    string bookingId;
+    User* user;
+    Movie* movie;
+    Show* show;
+    vector<Seat*> seat;
+    Payment payment;
+    Time timeOfBooking;
+    double amount;
+    BookingStatus bookingStatus;
+
+};
+
+
+class TheatreController{
+
+    vector<Theatre*> listOfTheatres;
+    unordered_map<Location*, vector<Theatre*>> locationWiseTheatreList;
+
+    public:
+
+    void addTheatre(Theatre* theatre)
+    {
+        this->listOfTheatres.push_back(theatre);
+    }
+
+    void addTheatrePerLocation(Location* location, Theatre* theatre)
+    {
+        this->locationWiseTheatreList[location].push_back(theatre);
+    }
+
+    vector<Theatre*> getTheatrePerLocation(Location* location)
+    {
+        return this->locationWiseTheatreList[location];
+    }
+
+    /*
+
+    // returns map<theatre, list<shows>> for a given city and movie
+
+    Map<Theatre, List<Show>> getAllShow(Movie movie, City city) {
+
+        //get all the theater of this city
+
+        Map<Theatre, List<Show>> theatreVsShows = new HashMap<>();
+
+        List<Theatre> theatres = cityVsTheatre.get(city);
+
+        //filter the theatres which run this movie
+
+        for(Theatre theatre : theatres) {
+
+            List<Show> givenMovieShows = new ArrayList<>();
+            List<Show> shows = theatre.getShows();
+
+            for(Show show : shows) {
+                if(show.movie.getMovieId() == movie.getMovieId()) {
+                    givenMovieShows.add(show);
+                }
+            }
+            if(!givenMovieShows.isEmpty()) {
+                theatreVsShows.put(theatre, givenMovieShows);
+            }
+        }
+
+        return theatreVsShows;
+    }
+
+
+    */
+
+    
+
+
+
+};
+
+//Driver class
+class BookMyShow
+{
+    MovieController* movieController;
+    TheatreController* theatreController;
+
+    public:
+
+    BookMyShow()
+    {
+        movieController=new MovieController();
+        theatreController=new TheatreController();
+
+        
+    }
+
+    void createMovie(string movieName);
+
+    void createTheatre(string theatreName);
+
+    void createLocation(string locationName);
+
+    
+
+
+};
+
+int main()
+{
+    BookMyShow* bookMyShow=new BookMyShow();
+
+
+}
