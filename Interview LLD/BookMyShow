@@ -1,4 +1,52 @@
+MovieController - list<Movies> , map<location, list<Movie>>
+TheatreController - list<Theatre>, map<location, list<Theatre>, returns map<theatre, list<shows>> for a given city and movie
 
+//Once I select a movie, I scan thru all theatres in that location, theatre has show, show has movie, whichever show has this movie name, I display that.
+
+Low-Level design for book My Show kind of service.
+
+
+Pessimist lock + time_until for concurrency.
+
+
+https://akshitbansall.medium.com/db-locking-in-reservation-systems-3b3d574c7676
+
+Optimistic lock is more suitable for the situation of reading more and writing less ( Read more scenes ), Pessimistic locking is more suitable for writing more and reading less ( Write more scenes ).
+
+there’s a seat-booking table at the backend where each row corresponds to one seat at one auditorium. Along with that it holds columns like movie session, seat status (booked or vacant) and customer id (null, if vacant).
+Let’s say I select a seat and proceed to the payment page. At this point the session will acquire a lock, so that no other session is able to read the record or make changes to it. Such kind of locking is called ‘Exclusive Locking’. For any other user session trying to access the locked records from the table, it will have to wait for the lock to be released for the particular record in the table.
+
+Another type of locking is ‘Shared Lock’ where a session can read the row while it is already being lock-acquired by some other session. However, it cannot make an update until the first session has released the lock.
+We use ‘FOR SHARE’ along with SELECT query to acquire shared lock.
+This kind of locking technique would not be preferable in our scenario. Imagine, multiple users will be reading a particular seat as ‘available’ and paying for it. But due to shared lock implementation, only the user session which acquired the lock first, will be getting the seat.
+
+Multiple Users Booking Multiple Seats Concurrently -
+Now let’s say I wanted to book seats for my entire family. I could see seats A1 to A4 as vacant so I selected them and proceeded to the payment page.
+//Transaction where user-1 books seats A1 to A4begin;seatsAvailable() -> Select * from booking where seat_number IN  (‘A1’,‘A2’, A3’, ‘A4’) FOR UPDATEbookTickets() -> update booking set customer_id = ‘101’ , seat_status = ‘booked’ where seat_number IN  (‘A1’,‘A2’, A3’, ‘A4’) ;commit;
+Meanwhile another user selected seats A3 to A5.
+At this moment, one proposition is to reject the entire transaction since all the seat requirements can’t be fulfilled.
+Or, confirm booking for seat A5 for the second user instead of waiting for the lock to be released from A3 and A4 seats.
+
+
+
+Pessimistic or optimistic locks
+First of all, let’s figure out which of the lock mechanisms we should use.
+Most tasks assume that we have such a flow:
+	1. A user sees the scheme of the cinema hall with available and reserved seats.
+	2. The user selects the desired places and sends a request to the server.
+	3. Places are reserved for 5–15 minutes, during which the user must make payment.
+	4. If the payment was successful, the seats are considered purchased.
+As soon as we described the flow, it became clearer how to act. We cannot use optimistic locking when waiting for payment since this will mean that several users may have time to pay for seats, but only the first of them will get it. But for the initial reservation, we can use any of the locks.
+
+
+Typically “pessimistic locking” with some time bound involves some kind of background task running on the backend that checks the pending reservation table, and when the reservation window expires, removes the reservation lock. You also store this expiration on the web page somewhere so the user can be notified when it expires.
+
+“Optimistic Locking” (checking for collisions only on completion) is a fair bit simpler: you just add versions to the resource, and if the current version is higher or equal to the expected version, you bail. You don’t usually want to do this sort of thing for a booking system however, since it’s lousy UX for someone to go through the whole process only to find someone sniped their reservation while they were booking it. Still, it is an option for very low-traffic systems, especially if the booking process is fast.
+
+
+
+Why not store list of theatres and show in movie class????? Everytime a show/theatre/theatrecontroller is added/removed, movie class will be update, 
+instead just add/delete show/theatre and update the info in theatrecontroller class. Decoupling.
 
 #include<iostream>
 #include<vector>
