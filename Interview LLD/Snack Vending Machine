@@ -1,0 +1,260 @@
+
+
+
+#include<iostream>
+#include<list>
+
+using namespace std;
+class State;
+class Coin;
+class Idle;
+
+
+
+
+class State{
+    public:
+    virtual void pressInsertCoinButton(VendingMachine* machine)=0; //idle state
+    virtual void addMoney(VendingMachine* machine, list<Coin*> coin)=0;  //has money state
+    virtual void pressProductSelectButton(VendingMachine* machine)=0;  //has money state
+    virtual void selectProduct(VendingMachine* machine, int code);   //product selection state
+    virtual list<Coin*> cancelProduct(VendingMachine* machine)=0;  //has money, product selection state
+    virtual Item* collectProduct(VendingMachine* machine, int code)=0;  //dispense state
+    virtual int returnChange(int money)=0;   //product selection state
+    virtual void updateInventory(VendingMachine* machine, Item* Item, ItemShelf* itemshelf)=0; // in idle state
+
+};
+class ProductSelection: public State{
+    public:
+    void pressInsertCoinButton(VendingMachine* machine); //idle state
+    void addMoney(VendingMachine* machine, list<Coin*> coin);  //has money state
+    void pressProductSelectButton(VendingMachine* machine);  //has money state
+    void selectProduct(VendingMachine* machine, int code)
+    {
+       
+        //find item
+        Item* item= machine->getInventory()->getItem(code);
+        //money paid by user
+        int userPaid=0;
+        list<Coin*> userCoin=machine->getCoin();
+        for(int i=0;i<userCoin.size();i++)
+        {
+            userPaid=userPaid + userCoin[i]->getValue();
+        }
+        int itemPrice=item->getPrice();
+        if(userPaid >=itemPrice)
+        {   
+            returnChange(userPaid-itemPrice);
+            
+        }
+        else if(userPaid < itemPrice)
+        {
+            cout<<"You have paid less money\n";
+            cancelProduct(machine,item);
+            machine->setState(new Idle());
+        }
+        machine->setState(new DispenseProduct(machine,code));
+
+    }
+     
+    list<Coin*> cancelProduct(VendingMachine* machine, Item* item);  //has money, product selection state
+    {
+         machine->setState(new Idle());
+         return machine->getCoin();
+    }
+    Item* collectProduct(VendingMachine* machine, int code);  //dispense state
+    int returnChange(int money)
+    {
+        return money;
+    }   //product selection state
+    void updateInventory(VendingMachine* machine, Item* Item, ItemShelf* itemshelf); // in idle state
+
+};
+class CollectMoney:public State{
+    public:
+    CollectMoney()
+    {
+        cout<<"Machine is now in collect money state\n";
+    }
+    void addMoney(VendingMachine* machine, list<Coin*> coin)
+    {
+        list<Coin*> machineCoin=machine->getCoin();
+        for(int i=0;i<coin.size();i++)
+        {
+            machineCoin->push_back(coin[i]);
+        }
+    }
+    void pressProductSelectButton(VendingMachine* machine)
+    {
+        machine->setState(new ProductSelection());
+    }
+    list<Coin*> cancelProduct(VendingMachine* machine)
+    {
+        machine->setState(new Idle());
+        return machine->getCoin();
+    }
+     
+     
+     void selectProduct(VendingMachine* machine, int code);   //product selection state
+     list<Coin*> cancelProduct(VendingMachine* machine) 
+     {
+         machine->setState(new Idle());
+         return machine->getCoin();
+     }
+     
+     int returnChange(int money);   //product selection state
+     void updateInventory(VendingMachine* machine, Item* Item, ItemShelf* itemshelf); // in idle state
+    void pressInsertCoinButton(VendingMachine* machine);
+    Item* collectProduct(VendingMachine* machine, int code);
+
+};
+
+class Idle:public State{
+    public:
+    Idle()
+    {
+        cout<<"Machine is idle\n";
+    }
+    Idle(VendingMachine* machine, list<Coin*> coin)
+    {
+        cout<<"Machine is currently in idle state\n";
+        machine->setCoin(coin);
+    }
+    void pressInsertCoinButton(VendingMachine* machine)
+    {
+        machine->setState(new CollectMoney());
+    }
+     
+     void addMoney(VendingMachine* machine, list<Coin*> coin);  //has money state
+     void pressProductSelectButton(VendingMachine* machine);  //has money state
+     void selectProduct(VendingMachine* machine, int code);   //product selection state
+     list<Coin*> cancelProduct(VendingMachine* machine); //has money, product selection state
+     Item* collectProduct(VendingMachine* machine, int code); //dispense state
+     int returnChange(int money);   //product selection state
+     void updateInventory(VendingMachine* machine, Item* Item, ItemShelf* itemShelf); // in idle state
+
+
+};
+
+
+
+
+class DispenseProduct: public State{
+    public:
+    Dispense(VendingMachine* machine, int code)
+    {
+        cout<<"Machine is in dispense state\n";
+        collectProduct(machine,code);
+    }
+    Item* collectProduct(VendingMachine* machine, int code)
+    {
+        Item* item=machine->getInventory()->getItem(code);
+        //check if available or sold out
+        int itemQuantity=item.getQuantity();
+        //if sold out
+        if(itemQuantity == 0)
+        {
+            int userPaid=0;
+            list<Coin*> userCoin=machine->getCoin();
+            for(int i=0;i<userCoin.size();i++)
+            {
+                userPaid=userPaid + userCoin[i]->getValue();
+            }
+            returnChange(userPaid);
+            return nullptr;
+        }
+        //change quantity of that item
+        item->setQuantity(itemQuantity-1);
+        machine->setState(new Idle());
+        return item;
+
+    }
+
+    
+};
+
+class Item{
+    string itemId;
+    string itemName;
+    string itemPrice;
+    int quantity;
+    publis:
+    int getPrice()
+    {
+        return itemPrice;
+    }
+    int getQuantity()
+    {
+        return quantity;
+    }
+    void setQuantity(int qiu)
+    {
+        quantity=qui;
+    }
+};
+class ItemShelf{
+    Item* item;
+    int shelfCode;
+    public:
+    Item* getItem(int code)
+    {
+        return item;
+    }
+    
+};
+class Inventory{
+    list<ItemShelf*> shelfList;
+    public:
+    Item* getItem(int code)
+    {
+    }
+    
+};
+class Coin{
+    int value;
+    public:
+    int getValue()
+    {
+        return value;
+    }
+    
+};
+class VendingMachine{
+    State* state;
+    Inventory* productInventory;
+    list<Coin*> coin;
+    public:
+    VendingMachine()
+    {
+        state=new Idle();
+        productInventory= new Inventory();
+    }
+    void setState(State* state)
+    {
+        this->state=state;
+    }
+    State* getVendingMachineState()
+    {
+        return state;
+    }
+    Inventory* getInventory()
+    {
+        return productInventory;
+    }
+    void setInventory(Inventory* inventory)
+    {
+        this->productInventory=inventory;
+    }
+    list<Coin*> getCoin()
+    {
+        return coin;
+    }
+    void setCoin(list<Coin*> coin)
+    {
+        this->coin=coin;
+    }
+    void addCoin(Coin* coinNum)
+    {
+        coin.push_back(coinNum);
+    }
+};
