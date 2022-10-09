@@ -1,0 +1,148 @@
+
+
+#include <iostream>
+#include<list>
+using namespace std;
+
+class Location{
+    string locationId;
+    string locationName;
+    string city;
+    string state;
+    string country;
+    string pincode;
+    public:
+    void getLocationDetails();
+    
+};
+class Date{
+    int date;
+    int month;
+    int year;
+};
+enum Gender{
+    female,
+    male,
+};
+class User{
+    string userId;
+    string firstName;
+    string secondName;
+    Date DOB;
+    string drivingLicense;
+    Gender gender;
+
+
+};
+enum VehicleStatus{
+    reserved,
+    available;
+    inactive,
+};
+class Vehicle{
+    string vehicleId;
+    string vehicleName;
+    string manufacturer;
+    string cc;
+    string seater;
+    Date DOM;
+    VehicleStatus vehicleStatus;
+    public:
+    virtual void getVehicleDetails()=0;
+};
+class Bike:public Vehicle{
+    public:
+    void getVehicleDetails();
+};
+
+class Car: public Vehicle{
+    public:
+    void getVehicleDetails();
+
+};
+class VehicleFactory{
+   
+    public:
+    static Vehicle* createVehicle(string vehicleType)
+    {
+         Vehicle* vehicle;
+        if(vehicleType=="Car")
+        {
+            vehicle=new Car();
+        }
+        else if(vehicleType=="Bike")
+        {
+            vehicle=new Bike();
+        }
+        return vehicle;
+    }
+};
+class VehicleInventoryManagement{
+    list<Vehicle*> storeWiseVehicleList;
+    public:
+    void addVehicle(Vehicle* vehicle);
+    void removeVehicle(Vehicle* vehicle);
+    list<Vehicle*> getVehicleListForStore();
+};
+class Time{
+    int hour;
+    int minute;
+    int second;
+};
+enum PaymentMethod{
+    card,
+    cash,
+    netbanking,
+};
+enum PaymentStatus{
+    success,
+    failed,
+    pending,
+};
+class Payment{
+    string paymentId;
+    double amount;
+    Date dateOfPayment;
+    Time timeOfPayment;
+    PaymentMethod paymentMethod;
+    PaymentStatus paymentStatus;
+
+};
+enum BillStatus{
+    paid,
+    notPaid,
+};
+class Bill{
+    string billId;
+    Date dateOfIssue;
+    double amount;
+    Payment* payment;
+    BillStatus billStatus;
+};
+class Reservation{
+    string reservationId;
+    User* user;
+    Store* store;
+    Location* pickUpLocation;
+    Location* dropLocation;
+    Vehicle* vehicle;
+    Date dateOfReservation;
+    Time startTime;
+    Time endTime;
+    Bill* bill;
+    
+};
+class Store{
+    Location* location;
+    string storeId;
+    string storeName;
+    VehicleInventoryManagement* vehicleInventoryManagement;
+    list<Reservation*> reservation;
+};
+class VehicleRentingSystem{
+    list<Store*> listOfStores;
+    list<User*> listOfUsers;
+    public:
+    list<Store*> getStoreDetails();
+    list<User*> getListOfUsers();
+};
