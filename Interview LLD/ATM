@@ -1,0 +1,493 @@
+State + Chain of responsibility
+
+#include<iostream>
+
+using namespace std;
+
+
+class CashProcessor{
+
+    protected:
+
+    
+
+    CashProcessor* successor;
+
+    public:
+
+    
+
+    void setSuccessor(CashProcessor* successor)
+    {
+        this->successor=successor;
+        
+    }
+
+    virtual void handleRequest(int amount)=0;
+
+
+
+};
+
+class TwoDenomination:public CashProcessor{
+
+    int quantity;
+
+    public:
+
+   
+    TwoDenomination()
+    {
+        this->quantity=2;
+    }
+
+    void handleRequest(int amount)
+    {
+        if(amount>=2000 && quantity>0)
+        {
+            cout<<"2000 note given\n";
+            amount=amount-2000;
+            quantity--;
+            handleRequest(amount); //request will come to it again
+        }
+        else
+        {
+            successor->handleRequest(amount);
+        }
+    }
+
+
+};
+
+class FiveDenomination: public CashProcessor{
+
+    int quantity;
+
+    public:
+
+   
+    FiveDenomination()
+    {
+        this->quantity=1;
+    }
+
+    void handleRequest(int amount)
+    {
+        if(amount>=500 && quantity>0)
+        {
+            cout<<"500 note given\n";
+            amount=amount-500;
+            quantity--;
+            handleRequest(amount);
+        }
+        else
+        {
+            successor->handleRequest(amount);
+        }
+    }
+
+};
+
+class OneDenomination:public CashProcessor{
+
+    int quantity;
+
+    public:
+
+   
+    OneDenomination()
+    {
+        this->quantity=5;
+    }
+
+    void handleRequest(int amount)
+    {
+        if(amount>=100 && quantity>0)
+        {
+            cout<<"100 note given\n";
+            amount=amount-100;
+            quantity--;
+            handleRequest(amount);
+        }
+        else
+        {
+            successor->handleRequest(amount);
+        }
+    }
+
+};
+
+
+class ATM{
+    State* ATMState;
+    int balance;
+    CashProcessor* cashProcessor;
+
+    public:
+
+    ATM()
+    {
+        ATMState=new Idle();
+        CashProcessor* two=new TwoDenomination();
+        CashProcessor* five=new FiveDenomination();
+        CashProcessor* one=new OneDenomination();
+
+        two->setSuccessor(five);
+        five->setSuccessor(one);
+
+        cashProcessor=two;
+
+        this->balance=5000;
+        
+
+
+    }
+
+    CashProcessor* returnLink()
+    {
+        return this->cashProcessor;
+    }
+
+    void setState(State* state)
+    {
+        this->ATMState=state;
+    }
+
+    State* getState()
+    {
+        return this->ATMState;
+    }
+
+    int getBalance()
+    {
+        return this->balance;
+    }
+
+    void setBalance(int amount)
+    {
+        this->balance=amount;
+    }
+
+
+};
+
+class State{
+
+    public:
+
+    virtual void insertCard(ATM* atm)=0; //idle state
+    virtual bool authenticatePIN(ATM* atm, int enteredPIN,Card* card)=0; //hasCard
+    virtual void selectOperation(ATM* atm,string operationName)=0;  //operation selection
+    virtual int withdrawCash(ATM* atm,int amount)=0; //cash withdraw
+    virtual bool pinSetting(ATM* atm,Card* card,int pin)=0; //set pin
+    virtual void returnCard(ATM* atm)=0; //hasCard, authentication fails, cashwithdraw, set pin
+    
+
+
+};
+
+class Idle:public State{
+
+    public:
+
+    Idle()
+    {
+        cout<<"Machine is currently in idle state\n";
+    }
+
+
+    void insertCard(ATM* atm)
+    {
+        cout<<"Please insert your card\n";
+        atm->setState(new HasCard());
+        
+    } 
+
+    bool authenticatePIN(ATM* atm, int enteredPIN,Card* card)
+    {
+        cout<<"Not valid operation\n";
+    }
+    void selectOperation(ATM* atm,string operationName)
+    {
+        cout<<"Not valid operation\n";
+    }
+
+    int withdrawCash(ATM* atm,int amount)
+    {
+        cout<<"Not valid operation\n";
+    }
+
+    bool pinSetting(ATM* atm,Card* card,int pin)
+    {
+        cout<<"Not valid operation\n";
+    }
+
+    void returnCard(ATM* atm)
+    {
+        cout<<"Not valid operation\n";
+    }
+
+
+
+};
+
+class HasCard:public State{
+
+    public:
+
+    HasCard()
+    {
+        cout<<"You have successfully inserted the card\n";
+    }
+
+    void insertCard(ATM* atm)
+    {
+        cout<<"Not valid operation\n";
+    }
+
+    bool authenticatePIN(ATM* atm, int enteredPIN,Card* card)
+    {
+        Bank* cardBank=card->getBankDetails();
+        int actualPin=cardBank->getUserPin();
+
+        if(actualPin==enteredPIN)
+        {
+            cout<<"User authenticated\n";
+            atm->setState(new OperationSelection());
+            return true;
+        }
+        
+        cout<<"Authentication failed\n";
+        atm->setState(new Idle());
+        returnCard(atm);
+        return false;
+    }
+
+    void selectOperation(ATM* atm,string operationName)
+    {
+        cout<<"Not valid operation\n";
+    }
+    int withdrawCash(ATM* atm,int amount)
+    {
+        cout<<"Not valid operation\n";
+    }
+
+    bool pinSetting(ATM* atm,Card* card,int pin)
+    {
+        cout<<"Not valid operation\n";
+    }
+    
+    void returnCard(ATM* atm)
+    {
+        cout<<"Card returned\n";
+    }
+    
+
+};
+
+class OperationSelection:public State{
+
+    public:
+
+    OperationSelection()
+    {
+        cout<<"Please select an operation \n";
+    }
+
+    void insertCard(ATM* atm)
+    {
+        cout<<"Not valid operation\n";
+    }
+
+    bool authenticatePIN(ATM* atm, int enteredPIN,Card* card)
+    {
+        cout<<"Not valid operation\n";
+    }
+
+    void selectOperation(ATM* atm,string operationName)
+    {
+        if(operationName=="Cash Withdraw")
+        {
+            atm->setState(new CashWithdrawl());
+        }
+        else if(operationName=="Set PIN")
+        {
+            atm->setState(new SetPIN());
+        }
+        else
+        {
+            atm->setState(new Idle());
+            returnCard(atm);
+        }
+
+
+
+    }
+    int withdrawCash(ATM* atm,int amount)
+    {
+        cout<<"Not valid operation\n";
+    }
+
+    bool pinSetting(ATM* atm,Card* card,int pin)
+    {
+        cout<<"Not valid operation\n";
+    }
+
+    void returnCard(ATM* atm)
+    {
+        cout<<"Not valid operation\n";
+    }
+    
+
+};
+
+class CashWithdrawl:public State{
+
+    public:
+
+    void insertCard(ATM* atm)
+    {
+        cout<<"Not valid operation\n";
+    }
+
+    bool authenticatePIN(ATM* atm, int enteredPIN,Card* card)
+    {
+        cout<<"Not valid operation\n";
+    }
+
+    void selectOperation(ATM* atm,string operationName)
+    {
+        cout<<"Not valid operation\n";
+    }
+
+    int withdrawCash(ATM* atm,int amount)
+    {
+        int balance=atm->getBalance();
+
+        if(amount > balance)
+        {
+            cout<<"Insufficient money in ATM\n";
+            return 0;
+        }
+
+        CashProcessor* cashProcessor=atm->returnLink();
+        cashProcessor->handleRequest(amount);
+        
+
+        atm->setState(new Idle());
+        returnCard(atm);
+        return amount;
+        
+    }
+
+    bool pinSetting(ATM* atm,Card* card,int pin)
+    {
+        cout<<"Not valid operation\n";
+    }
+    void returnCard(ATM* atm)
+    {
+        cout<<"Please collect your card\n";
+    }
+   
+};
+
+class SetPIN:public State{
+
+    public:
+
+    SetPIN()
+    {
+        cout<<"Please set your pin\n";
+    }
+
+    void insertCard(ATM* atm)
+    {
+        cout<<"Not valid operation\n";
+    }
+
+    bool authenticatePIN(ATM* atm, int enteredPIN,Card* card)
+    {
+        cout<<"Not valid operation\n";
+    }
+
+    void selectOperation(ATM* atm,string operationName)
+    {
+        cout<<"Not valid operation\n";
+    }
+
+    int withdrawCash(ATM* atm,int amount)
+    {
+        cout<<"Not valid operation\n";
+    }
+    
+    bool pinSetting(ATM* atm,Card* card,int pin)
+    {   
+        Bank* cardBank=card->getBankDetails();
+        cardBank->setUserPin(pin);
+
+        atm->setState(new Idle());
+        returnCard(atm);
+
+        return true;
+
+        
+
+    }
+    void returnCard(ATM* atm)
+    {
+        cout<<"Card returned\n";
+    }
+     
+
+};
+
+
+
+class Date{
+    int day;
+    int month;
+    int year;
+
+};
+
+class User{
+
+    int userId;
+    string username;
+    Date DOB;
+    Bank* bank;
+    Card* card;
+
+
+};
+
+class Bank{
+
+    int userPin;
+
+    public:
+
+    int getUserPin()
+    {
+        return userPin;
+    }
+
+    bool setUserPin(int enteredPin)
+    {
+        this->userPin=enteredPin;
+    }
+
+};
+
+class Card{
+
+    Bank* bank;
+
+    public:
+
+    Bank* getBankDetails()
+    {
+        return bank;
+    }
+
+};
