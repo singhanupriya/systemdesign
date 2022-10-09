@@ -1,0 +1,386 @@
+https://www.youtube.com/watch?v=x8N3fINNdTE&list=PL6W8uoQQ2c61X_9e6Net0WdYZidm7zooW&index=9
+
+#include<iostream>
+#include<vector>
+#include<deque>
+
+using namespace std;
+
+class PlayingSymbol
+{
+    string symbol;
+
+    public:
+
+    PlayingSymbol(string symbol)
+    {
+        this->symbol=symbol;
+    }
+
+    string getSymbol()
+    {
+        return this->symbol;
+    }
+
+    virtual void print()=0;
+    
+};
+
+class SymbolX: public PlayingSymbol{
+
+    public:
+
+    SymbolX(string x):PlayingSymbol(x)
+    {
+        print();
+    }
+
+    void print()
+    {
+        cout<<"Symbol "<<getSymbol()<<" has been assigned to you\n";
+    }
+
+};
+
+class SymbolO: public PlayingSymbol{
+
+    public:
+
+    SymbolO(string x):PlayingSymbol(x)
+    {
+        print();
+    }
+
+    void print()
+    {
+        cout<<"Symbol "<<getSymbol()<<" has been assigned to you\n";
+    }
+
+};
+
+class Player{
+
+    string playerId;
+    string username;
+    string gender;
+    PlayingSymbol* playingSymbol;
+    
+
+    public:
+
+    Player(string playerId, string username, string gender, PlayingSymbol* playingSymbol)
+    {
+        this->playerId=playerId;
+        this->username=username;
+        this->gender=gender;
+        this->playingSymbol=playingSymbol;
+        cout<<"Player "<<this->playerId<<" has selected "<<this->playingSymbol->getSymbol()<<endl;
+    }
+
+    string getUsername()
+    {
+        return this->username;
+    }
+
+    string getPlayerID()
+    {
+        return this->playerId;
+    }
+
+    string getPlayerGender()
+    {
+        return this->gender;
+    }
+
+    PlayingSymbol* getUserSymbol()
+    {
+        return this->playingSymbol;
+    }
+
+
+};
+
+class Board
+{
+    protected:
+
+    int size;
+    vector<vector<PlayingSymbol*> > board;
+
+    public:
+
+    Board(int size,vector<vector<PlayingSymbol*> > board)
+    {
+        this->size=size;
+        this->board=board;
+        
+        cout<<"Your board is ready\n";
+    }
+
+    
+
+    //returns free boxes in the board
+    vector<vector<int> > getFreeSlots()
+    {
+        vector<vector<int> > freeSlots;
+        for(int i=0;i<this->size;i++)
+        {
+            for(int j=0;j<this->size;j++)
+            {
+                if(this->board[i][j]==nullptr)
+                {
+                    vector<int> temp;
+                    temp.push_back(i);
+                    temp.push_back(j);
+                    freeSlots.push_back(temp);
+                }
+            }
+        }
+
+        return freeSlots;
+
+    }
+
+    bool addSymbol(PlayingSymbol* symbol, int i, int j)
+    {
+        if(this->board[i][j]!=nullptr)
+        {
+            cout<<"This box is not empty\n";
+            return false;
+        }
+
+        this->board[i][j]=symbol;
+        cout<<"Placed "<<symbol->getSymbol()<<" at "<<i<<" "<<j<<endl;
+        return true;
+    }
+
+    int getSize()
+    {
+        return this->size;
+    }
+
+    PlayingSymbol* getSymbolPlaced(int i, int j)
+    {
+        if(i>=this->size || i<0 || j>=this->size || j<0)
+        {
+            cout<<"Not valid input\n";
+            return nullptr;
+        }
+
+        return board[i][j];
+    }
+    
+
+
+};
+
+
+class Game{
+
+    deque<Player*> listOfPlayers; //whichever player played pop it from front and push to back
+    Board* board;
+
+    public:
+
+    Game()
+    {   
+        PlayingSymbol* X=new SymbolX("X");
+        PlayingSymbol* O=new SymbolX("O");
+        Player* player1=new Player("player1","anupriya","female",X);
+        Player* player2=new Player("player2","sumo","male",O);
+        addPlayers(player1);
+        addPlayers(player2);
+        vector<vector<PlayingSymbol*> > startingBoard (3, vector<PlayingSymbol*>(3,nullptr));
+        board=new Board(3,startingBoard);
+
+    }
+
+    void addPlayers(Player* player)
+    {
+        listOfPlayers.push_back(player);
+    }
+
+    
+
+    void play()
+    {
+        bool winner=false;
+
+        while(!winner)
+        {
+            Player* currPlayer=listOfPlayers.front();
+            listOfPlayers.pop_front();
+
+            PlayingSymbol* currSymbol=currPlayer->getUserSymbol();
+
+            vector<vector<int> > freeSlots=board->getFreeSlots();
+
+            //if no freeSlots, end Game
+            if(freeSlots.size()==0)
+            {
+                cout<<" No winner\n";
+                return;
+            }
+
+            for(int i=0;i<freeSlots.size();i++)
+            {
+                cout<<"Free "<<freeSlots[i][0]<<" "<<freeSlots[i][1]<<endl;
+            }
+
+            cout<<"Enter your move (i,j) seperated by space\n";
+
+            int userX,userY;
+            cin>>userX>>userY;
+
+            bool played=false;
+
+            while(!played)
+            {
+                played=board->addSymbol(currSymbol,userX,userY);
+            }
+
+            //push the player to last
+            listOfPlayers.push_back(currPlayer);
+
+            //check if any winner
+
+            winner=checkWinner(currSymbol, userX,userY);
+
+            if(winner)
+            {
+                cout<<currPlayer->getPlayerID()<<" is the winner\n";
+                break;
+            }
+            
+            
+        }
+
+        winner=true;
+    }
+
+    bool checkWinner(PlayingSymbol* symbol, int inputRow, int inputCol)
+    {
+        bool rowMatch = true;
+        bool colMatch = true;
+        bool diagonalMatch = true;
+        bool antiDiagonalMatch = true;
+
+
+        
+        //row
+        for(int i=0;i<board->getSize();i++)
+        {
+            if(board->getSymbolPlaced(inputRow,i)==nullptr || board->getSymbolPlaced(inputRow,i)!=symbol)
+            {
+                rowMatch=false;
+            }
+        }
+
+        //col
+        //row
+        for(int i=0;i<board->getSize();i++)
+        {
+            if(board->getSymbolPlaced(i,inputCol)==nullptr || board->getSymbolPlaced(i,inputCol)!=symbol)
+            {
+                colMatch=false;
+            }
+        }
+
+        //normal dia
+        for(int i=0;i<board->getSize();i++)
+        {
+            if(board->getSymbolPlaced(i,i)==nullptr || board->getSymbolPlaced(i,i)!=symbol)
+            {
+                diagonalMatch=false;
+            }
+        }
+
+        //opposite dia
+        for(int i=board->getSize()-1;i>=0;i--)
+        {
+            if(board->getSymbolPlaced(i,board->getSize()-1-i)==nullptr || board->getSymbolPlaced(i,board->getSize()-1-i)!=symbol)
+            {
+                antiDiagonalMatch=false;
+            }
+        }
+
+        return rowMatch || colMatch || diagonalMatch || antiDiagonalMatch;
+
+
+
+    }
+    
+
+};
+
+
+
+int main()
+{
+    Game* game=new Game();
+    game->play();
+    
+    
+    return 0;
+
+
+}
+
+Output:
+
+Symbol X has been assigned to you
+Symbol O has been assigned to you
+Player player1 has selected X
+Player player2 has selected O
+Your board is ready
+Free 0 0
+Free 0 1
+Free 0 2
+Free 1 0
+Free 1 1
+Free 1 2
+Free 2 0
+Free 2 1
+Free 2 2
+Enter your move (i,j) seperated by space
+0 0
+Placed X at 0 0
+Free 0 1
+Free 0 2
+Free 1 0
+Free 1 1
+Free 1 2
+Free 2 0
+Free 2 1
+Free 2 2
+Enter your move (i,j) seperated by space
+2 2
+Placed O at 2 2
+Free 0 1
+Free 0 2
+Free 1 0
+Free 1 1
+Free 1 2
+Free 2 0
+Free 2 1
+Enter your move (i,j) seperated by space
+1 0
+Placed X at 1 0
+Free 0 1
+Free 0 2
+Free 1 1
+Free 1 2
+Free 2 0
+Free 2 1
+Enter your move (i,j) seperated by space
+1 1
+Placed O at 1 1
+Free 0 1
+Free 0 2
+Free 1 2
+Free 2 0
+Free 2 1
+Enter your move (i,j) seperated by space
+2 0
+Placed X at 2 0
+player1 is the winner
