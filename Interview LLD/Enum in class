@@ -1,0 +1,80 @@
+https://www.geeksforgeeks.org/enum-classes-in-c-and-their-advantage-over-enum-datatype/
+
+#include<iostream>
+
+using namespace std;
+
+enum class Payment
+{
+    card,
+    cash,
+};
+
+class A{
+
+    int x;
+    Payment payment;
+    public:
+
+    A(int x, Payment payment)
+    {
+        this->x=x;
+        this->payment=payment;
+    }
+
+    int getValue()
+    {
+        return this->x;
+    }
+
+    Payment getPayment()
+    {
+        return this->payment;
+    }
+
+};
+
+class B:public A{
+    public:
+
+    B(int x, Payment y):A(x,y)
+    {
+        cout<<"B's object\n";
+    }
+
+};
+
+class C:public A{
+    public:
+
+    C(int x, Payment y):A(x,y)
+    {
+        cout<<"C's object\n";
+    }
+
+};
+
+int main()
+{
+    Payment p=Payment::cash;
+    A* one=new B(5,p);
+    if(p==Payment::card)
+    {
+        cout<<"card payment\n";
+    }
+    else{
+        cout<<"cash payment\n";
+    }
+
+    A* two=new C(15,p);
+    cout<<two->getValue();
+
+    return 0;
+}
+
+
+Output:
+B's object
+cash payment
+C's object
+15%       
