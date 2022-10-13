@@ -1,0 +1,376 @@
+Used: BST per date wise to get free slots of rooms
+
+Time:O(H), worst:o(n)
+
+
+#include<iostream>
+#include<vector>
+#include<unordered_map>
+
+using namespace std;
+
+class Floor;
+class MeetingRoom;
+class MeetingRoomSchedule;
+
+class User
+{
+    string userId;
+    string username;
+    string userEmail;
+
+    public:
+    User(string userId, string username, string userEmail)
+    {
+        this->userId=userId;
+        this->username=username;
+        this->userEmail=userEmail;
+    }
+
+    string getUserEmail()
+    {
+        return this->userEmail;
+    }
+
+    string getUsername()
+    {
+        return this->username;
+    }
+};
+
+
+class Building{
+    string buildingId;
+    string buildingName;
+    string campus;
+    vector<Floor>* listOfFloors;
+
+    public:
+    Building(string buildingId, string buildingName, string campus)
+    {
+        this->buildingId=buildingId;
+        this->buildingName=buildingName;
+        this->campus=campus;
+    }
+
+    string getBuildingId()
+    {
+        return this->buildingId;
+    }
+
+};
+
+class Floor{
+
+    string floorId;
+    string floorName;
+    vector<MeetingRoom*> listOfMeetingRooms;
+
+    public:
+
+    string getFloorId()
+    {
+        return this->floorId;
+    }
+
+};
+
+
+class Address{
+
+    Building* building;
+    Floor* floor;
+
+};
+
+class Date{
+    int day;
+    int month;
+    int year;
+
+    public:
+
+    Date(int day, int month, int year)
+    {
+        this->day=day;
+        this->month=month;
+        this->year=year;
+    }
+
+
+};
+
+class Node{
+
+    public:
+
+    int start;
+    int end;
+    Node* left;
+    Node* right;
+
+    Node(int start, int end)
+    {
+        this->start=start;
+        this->end=end;
+        left=nullptr;
+        right=nullptr;
+    }
+
+    
+
+};
+
+class MeetingRoomSchedule{
+
+    unordered_map<Date*,Node*> calenderPerDay;
+
+    public:
+
+    MeetingRoomSchedule()
+    {
+
+    }
+
+    bool book(Date* date, int start, int end)
+    {
+        
+        if(!isAvailable(date,start,end))
+        {
+            return false;
+        }
+        calenderPerDay[date]=insert(calenderPerDay[date],start,end);
+        cout<<"Booking confirmed\n";
+        return true;
+    }
+
+    bool isAvailable(Date* date, int start, int end)
+    {
+        if(find(calenderPerDay[date],start,end))
+        {
+            cout<<"Booking already exist\n";
+            return false;
+        }
+        cout<<"Room is available\n";
+        return true;
+    }
+
+
+
+    bool find(Node* root, int start, int end)
+    {
+        if(!root)
+        {
+            return false;
+        }
+
+        if(root->start>=start && root->start<end)
+        {
+            return true;
+        }
+
+        if(start>=root->start && start<root->end)
+        {
+            return true;
+        }
+
+        if(start>=root->end)
+        {
+            return find(root->right,start,end);
+        }
+
+        return find(root->left,start,end);
+    }
+
+    Node* insert(Node* root, int start, int end)
+    {
+        if(!root)
+        {
+            return new Node(start,end);
+        }
+
+        if(start >= root->end)
+        {
+            root->right=insert(root->right,start,end);
+        }
+        else
+        {
+            root->left=insert(root->left,start,end);
+        }
+
+        return root;
+
+    }
+
+};
+
+class MeetingRoom{
+
+    string meetingRoomId;
+    string meetingRoomName;
+    //Address meetingRoomAddress;
+    int capacity;
+    MeetingRoomSchedule* meetingRoomSchedule;
+
+    public:
+
+    MeetingRoom(string meetingRoomId, string meetingRoomName, int capacity)
+    {
+        this->meetingRoomId=meetingRoomId;
+        this->meetingRoomName=meetingRoomName;
+       // this->meetingRoomAddress=address;
+        this->capacity=capacity;
+        this->meetingRoomSchedule=new MeetingRoomSchedule();
+    }
+
+    int getCapacity()
+    {
+        return this->capacity;
+    }
+
+    MeetingRoomSchedule* getRoomSchedule()
+    {
+        return this->meetingRoomSchedule;
+    }
+
+    string getRoomId()
+    {
+        return this->meetingRoomId;
+    }
+
+
+};
+
+
+class Scheduler{
+
+    vector<MeetingRoom*> meetingRoomList;
+
+    public:
+
+    void addMeetingRooms(MeetingRoom* m)
+    {
+        meetingRoomList.push_back(m);
+    }
+
+    vector<MeetingRoom*> getRoomList()
+    {
+        return this->meetingRoomList;
+    }
+
+    vector<MeetingRoom*> getAvailableRoom(int capacity, Date* date, int start, int end)
+    {
+
+        vector<MeetingRoom*> availableRooms;
+        for(int i=0;i<meetingRoomList.size();i++)
+        {
+            MeetingRoom* currRoom=meetingRoomList[i];
+            int roomCapacity=currRoom->getCapacity();
+            if(roomCapacity>=capacity)
+            {
+                MeetingRoomSchedule* roomScheduler=currRoom->getRoomSchedule();
+                if(roomScheduler->isAvailable(date,start,end))
+                {
+                    availableRooms.push_back(currRoom);
+                }
+            }
+            
+            
+            
+
+        }
+
+        return availableRooms;
+
+    }
+
+    bool bookRoom(MeetingRoom* meetingRoom, Date* date, int start, int end)
+    {
+        MeetingRoomSchedule* roomScheduler=meetingRoom->getRoomSchedule();
+        return roomScheduler->book(date,start,end);
+    }
+
+};
+
+class Driver{
+
+    Scheduler* scheduler;
+
+    public:
+
+    Driver()
+    {
+        scheduler=new Scheduler();
+        createMeetingRoom();
+
+    }
+
+    void createMeetingRoom()
+    {
+        MeetingRoom* m1=new MeetingRoom("m1","room1",50);
+        MeetingRoom* m2=new MeetingRoom("m2","room2",100);
+        MeetingRoom* m3=new MeetingRoom("m3","room3",5);
+        scheduler->addMeetingRooms(m1);
+        scheduler->addMeetingRooms(m2);
+        scheduler->addMeetingRooms(m3);
+
+    }
+
+    vector<MeetingRoom*> getRooms(int capacity,Date* date, int start, int end)
+    {
+        return scheduler->getAvailableRoom(capacity,date,start,end);
+    }
+
+    bool makeBooking(string roomId,Date* date, int start, int end)
+    {
+        MeetingRoom* meetingRoom=nullptr;
+
+        vector<MeetingRoom*> rooms=scheduler->getRoomList();
+        for(int i=0;i<rooms.size();i++)
+        {
+            if(rooms[i]->getRoomId()==roomId)
+            {
+                meetingRoom=rooms[i];
+            }
+        }
+        if(meetingRoom==nullptr)
+        {
+            cout<<"Room doesn't exist\n";
+            return false;
+        }
+
+        return scheduler->bookRoom(meetingRoom,date,start,end);
+    }
+
+};
+
+
+int main()
+{
+    Driver* driver=new Driver();
+    Date* date1=new Date(2,10,2022);
+    vector<MeetingRoom*> rooms=driver->getRooms(1,date1,10,16);
+    for(int i=0;i<rooms.size();i++)
+    {
+        cout<<rooms[i]->getRoomId()<<endl;
+    }
+    driver->makeBooking("m1",date1,10,16);
+
+    rooms=driver->getRooms(1,date1,12,18);
+    for(int i=0;i<rooms.size();i++)
+    {
+        cout<<rooms[i]->getRoomId()<<endl;
+    }
+    driver->makeBooking("m2",date1,12,18);
+
+    Date* date2=new Date(3,10,2022);
+    rooms=driver->getRooms(1,date2,12,18);
+    for(int i=0;i<rooms.size();i++)
+    {
+        cout<<rooms[i]->getRoomId()<<endl;
+    }
+    driver->makeBooking("m2",date2,12,18);
+
+}
+
+
