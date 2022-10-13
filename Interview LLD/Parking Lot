@@ -1,0 +1,337 @@
+https://www.youtube.com/watch?v=MtjZf7291zc
+
+
+Design Pattens used:
+1. Factory- 2 /3/4 wheeler
+2. Strategy - costCalculation/findingSpot
+
+
+#include<iostream>
+#include<vector>
+
+using namespace std;
+
+class Vehicle;
+class ParkingStrategy;
+
+class ParkingSpot{
+
+    protected:
+    string parkingSlotId;
+    
+    bool isEmpty;
+    int price;
+    Vehicle* vehicle;
+    
+    public:
+
+    ParkingSpot(string id)
+    {
+        this->parkingSlotId=id;
+        
+        this->isEmpty=true;
+    }
+
+    void setStatus(bool status)
+    {
+        this->isEmpty=false;
+    }
+
+    bool getStatus()
+    {
+        return this->isEmpty;
+    }
+
+    string getSlotId()
+    {
+        return this->parkingSlotId;
+    }
+
+   
+
+    virtual void park(Vehicle* vehicle)=0;
+    virtual void unPark()=0;
+    virtual void setPrice()=0;
+
+    int getPrice()
+    {
+        return this->price;
+    }
+
+
+};
+
+
+
+
+class TwoWheelerParkingSpot: public ParkingSpot{
+
+    public:
+
+    TwoWheelerParkingSpot(string id):ParkingSpot(id)
+    {
+
+    }
+
+    void park(Vehicle* vehicle)
+    {   
+        vehicle=vehicle;
+        isEmpty=false;
+
+    }
+
+    void unPark()
+    {
+        vehicle=nullptr;
+        isEmpty=true;
+    }
+    
+    void setPrice()
+    {
+        price=20;
+    }
+
+};
+
+class FourWheelerParkingSpot: public ParkingSpot{
+
+    public:
+
+    FourWheelerParkingSpot(string id):ParkingSpot(id)
+    {
+
+    }
+
+    void park(Vehicle* vehicle)
+    {   
+        vehicle=vehicle;
+        isEmpty=false;
+
+    }
+
+    void unPark()
+    {
+        vehicle=nullptr;
+        isEmpty=true;
+    }
+    
+    void setPrice()
+    {
+        price=50;
+    }
+
+};
+
+class ParkingSpotFactory{
+
+    public:
+
+    static ParkingSpot* createParkingSpot(string type,string id)
+    {
+        ParkingSpot* spot;
+
+        if(type=="twoWheeler")
+        {
+            spot=new TwoWheelerParkingSpot(id);
+        }
+        else if(type=="fourWheeler")
+        {
+            spot=new FourWheelerParkingSpot(id);
+
+        }
+
+        return spot;
+
+    }
+
+};
+
+
+class ParkingSpotManager{
+
+    protected:
+
+    vector<ParkingSpot*> parkingSpotList;
+    ParkingStrategy* parkingStrategy;
+
+    public:
+
+    virtual void setParkingList(vector<ParkingSpot*> parkingSpotList)=0;
+    virtual void setParkingStrategy(ParkingStrategy* parkingStrategy)=0;
+    virtual ParkingSpot* findSpot(Vehicle* vehicle)=0;
+
+
+};
+
+class TwoWheelerParkingSpotManager:public ParkingSpotManager{
+
+    public:
+
+    void setParkingList(vector<ParkingSpot*> parkingSpotList)
+    {
+       parkingSpotList=parkingSpotList;
+    }
+
+    void setParkingStrategy(ParkingStrategy* parkingStrategy)
+    {
+         parkingStrategy=parkingStrategy;
+    }
+
+    ParkingSpot* findSpot(Vehicle* vehicle)
+    {
+        //use strategy method to find spot
+    }
+
+
+};
+
+
+class FourWheelerParkingSpotManager:public ParkingSpotManager{
+
+    public:
+
+    void setParkingList(vector<ParkingSpot*> parkingSpotList)
+    {
+       parkingSpotList=parkingSpotList;
+    }
+
+    void setParkingStrategy(ParkingStrategy* parkingStrategy)
+    {
+         parkingStrategy=parkingStrategy;
+    }
+
+    ParkingSpot* findSpot(Vehicle* vehicle)
+    {
+        //use strategy method to find spot
+    }
+
+
+};
+
+class ParkingSpotManagerFactory{
+
+    public:
+
+    static ParkingSpotManager* getParkingSpotManager(string type)
+    {
+        ParkingSpotManager* manager;
+
+        if(type=="twoWheeler")
+        {
+            manager=new TwoWheelerParkingSpotManager();
+        }
+        else if(type=="fourWheeler")
+        {
+            manager=new FourWheelerParkingSpotManager();
+        }
+        return manager;
+    }
+};
+
+class ParkingStrategy{
+
+    public:
+
+    virtual ParkingSpot* findSpot()=0;
+
+};
+
+class NearestEntrance: public ParkingStrategy{
+
+    public:
+
+    ParkingSpot* findSpot()
+    {
+        cout<<"Nearest Entrance\n";
+    }
+
+};
+
+class NearestExit: public ParkingStrategy{
+
+    public:
+
+    ParkingSpot* findSpot()
+    {
+        cout<<"Nearest Exit\n";
+    }
+
+};
+
+
+class Vehicle{
+
+    string vehicleId;
+    string type;
+    string manufacturer;
+
+    public:
+
+    Vehicle()
+
+};
+
+class Time{
+    int hour;
+    int min;
+    int sec;
+
+};
+
+class CostCalculation{
+
+};
+
+class WeekdayCostCalculation:public CostCalculation{
+
+};
+
+class WeekendCostCalculation:public CostCalculation{
+
+};
+
+class Ticket{
+
+    int ticketID;
+    Vehicle* vehicle;
+    ParkingSpot* spot;
+    Time inTime;
+    
+
+};
+
+
+class EntranceGate{
+
+    string gateId;
+    ParkingSpotManager* manager; //return parking spot based on the type of manager and strategy used by that manager
+    
+
+    public:
+
+    ParkingSpot* findSpace();
+    bool bookSpot(Vehicle* vehicle, ParkingSpot* spot);
+    Ticket* getTicket();
+
+};
+
+enum class PaymentMethod{
+    cash,
+    card,
+};
+
+class ExitGate{
+
+    string gateId;
+    Time exitTime;
+    CostCalculation* costCalculation;
+    PaymentMethod paymentMethod;
+    
+    
+
+    public:
+
+    double calculateCost(Ticket* ticket);
+
+
+};
