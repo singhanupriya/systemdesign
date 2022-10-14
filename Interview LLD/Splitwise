@@ -1,0 +1,440 @@
+1. Factory design pattern
+
+Group------has list<Expense>, GroupExpenseManager, GroupExpenseGraph, list<USer>
+Expense----Split,currency
+Split---EqualSplit,ExactSplit
+GroupExpenseGraph- unordered_map<user,balance>
+
+
+#include<iostream>
+#include<vector>
+#include<unordered_map>
+
+using namespace std;
+
+class Expense;
+class GroupExpenseManager;
+class Split;
+class GroupExpenseGraph;
+
+class User{
+    
+    string userId;
+    string username;
+    string userEmail;
+
+    public:
+
+    User(string userID, string username, string userEmail)
+    {
+        this->userId=userID;
+        this->username=username;
+        this->userEmail=userEmail;
+    }
+
+    string getUserId()
+    {
+        return this->userId;
+    }
+
+
+};
+
+class Group{
+
+    protected:
+
+    string groupId;
+    string groupName;
+    vector<User*> userList;
+    GroupExpenseManager* groupExpenseManager;
+    GroupExpenseGraph* groupExpenseGraph;
+    
+
+    public:
+
+    void setExpenseManager(GroupExpenseManager* groupExpenseManager)
+    {
+        this->groupExpenseManager= groupExpenseManager;
+    }
+
+    void setExpenseGraph(GroupExpenseGraph* groupExpenseGraph)
+    {
+        this->groupExpenseGraph= groupExpenseGraph;
+    }
+
+    Group(string groupId, string groupName)
+    {
+        this->groupId=groupId;
+        this->groupName=groupName;
+        
+        cout<<"Group created\n";
+
+    }
+
+    void addUser(User* user)
+    {
+        this->userList.push_back(user);
+    }
+
+    bool removeUser(User* user)
+    {
+        auto it=find(userList.begin(),userList.end(),user);
+
+        if(it==userList.end())
+        {
+            cout<<"User not in the group\n";
+            return false;
+        }
+        userList.erase(it);
+        return true;
+    }
+
+    vector<User*> getUserList()
+    {
+        return this->userList;
+    }
+
+    GroupExpenseGraph* getExpenseGraph()
+    {
+        return this->groupExpenseGraph;
+    }
+
+};
+
+class GroupExpenseManager{
+
+    protected:
+    Group* group;
+    vector<Expense*> expenseList;
+    
+
+    
+
+    public:
+
+    void addExpense(Expense* expense)
+    {
+        this->expenseList.push_back(expense);
+    }
+
+    bool removeExpense(Expense* expense)
+    {
+        auto it=find(expenseList.begin(),expenseList.end(),expense);
+
+        if(it==expenseList.end())
+        {
+            cout<<"User not in the group\n";
+            return false;
+        }
+        expenseList.erase(it);
+        return true;
+    }
+
+    vector<Expense*> getExpense()
+    {
+        return this->expenseList;
+    }
+
+};
+
+class GroupExpenseGraph{
+
+    Group* group;
+    unordered_map<User*,double> balance; //every user to his balance mapping
+    //vector<vector<double>> expenseGraph; if u create this graph, every time a user is added or removed, u will need to create a new
+    //graph, what will happen to the old graph, instead, just push all transaction values in the map
+
+    public:
+
+    GroupExpenseGraph()
+    {
+        cout<<"Graph created\n";
+    }
+
+    double getBalanceForUser(User* user)
+    {
+        return balance[user];
+    }
+
+    void updateBalance(User* user, double amount)
+    {
+        balance[user]+=amount;
+    }
+
+    void getData()
+    {
+        for(auto it:balance)
+        {
+            cout<<it.first->getUserId()<<" "<<it.second<<endl;
+        }
+    }
+
+    User* getMax()
+    {
+        double maxCredit=0.0;
+        User* user;
+
+        for(auto it:balance)
+        {
+            if(it.second > maxCredit)
+            {
+                maxCredit=it.second;
+                user=it.first;
+            }
+        }
+
+        return user;
+    }
+
+    User* getMin()
+    {
+        double maxDebiter=0.0;
+        User* user;
+
+        for(auto it:balance)
+        {
+            if(it.second < maxDebiter)
+            {
+                maxDebiter=it.second;
+                user=it.first;
+            }
+        }
+
+        return user;
+    }
+
+    void settleUp()
+    {
+        User* maxCrediter=getMax();
+        User* maxDebiter=getMin();
+
+
+
+        if(balance[maxCrediter]==0.0 && balance[maxDebiter]==0.0)
+        {
+            cout<<"All are settled\n";
+            return;
+        }
+
+        double minAmount=min(balance[maxCrediter], (-1)*balance[maxDebiter]);
+
+        cout<<maxDebiter->getUserId()<<" owes "<<maxCrediter->getUserId()<<" "<<minAmount<<endl;
+
+        balance[maxCrediter]-=minAmount;
+        balance[maxDebiter]+=minAmount;
+
+        settleUp();
+
+    }
+
+};
+
+enum class Currency{
+    rupee,
+    dollar,
+    pound,
+
+};
+
+class Expense{
+
+    string expenseId;
+    string expenseName;
+    Currency currency;
+    Split* split;
+
+
+};
+
+class Split{
+
+    protected:
+
+    //vector<User*> peopleInvolved;
+    Group* group;
+    double amount;
+    User* userPaidBy;
+    vector<pair<User*,double> >  edges;
+
+    public:
+
+    Split(Group* group,double amount, User* userPaidBy,vector<pair<User*,double> >  edges)
+    {
+        this->group=group;
+        this->amount=amount;
+        this->userPaidBy=userPaidBy;
+        this->edges=edges;
+    }
+
+   
+
+    
+
+    virtual void simplifySplit()=0;
+
+};
+
+class EqualSplit:public Split
+{
+    public:
+
+    EqualSplit(Group* group,double amount,User* userPaidBy,vector<pair<User*,double> >  edges):Split(group,amount,userPaidBy,edges)
+    {
+
+    }
+
+    void simplifySplit( )
+    {
+        int size=edges.size();
+        GroupExpenseGraph* groupExpenseGraph=group->getExpenseGraph();
+        groupExpenseGraph->updateBalance(userPaidBy,amount); //add total amount to user paid by
+        //now subtract equally from all those who are a part of group
+        double perPersonSplit=(-1)*amount/size;
+
+        for(int i=0;i<size;i++)
+        {
+            groupExpenseGraph->updateBalance(edges[i].first,perPersonSplit); 
+        }
+
+    }
+
+
+
+};
+
+class ExactSplit:public Split
+{
+    public:
+
+    ExactSplit(Group* group,double amount,User* userPaidBy,vector<pair<User*,double> >  edges):Split(group,amount,userPaidBy,edges)
+    {
+
+    }
+
+    void simplifySplit( )
+    {
+        //check if total is equal to the amount of the split
+        double totalAmount=0;
+        for(int i=0;i<edges.size();i++)
+        {
+            totalAmount+=edges[i].second;
+        }
+        if(totalAmount!=amount)
+        {
+            cout<<"Split does not add upto the total amount";
+            return;
+        }
+
+        int size=edges.size();
+        GroupExpenseGraph* groupExpenseGraph=group->getExpenseGraph();
+        groupExpenseGraph->updateBalance(userPaidBy,amount); //add total amount to user paid by
+        //now subtract equally from all those who are a part of group
+        
+
+        for(int i=0;i<size;i++)
+        {
+            groupExpenseGraph->updateBalance(edges[i].first,(-1)*edges[i].second);  //- as they owe the person who paid
+        }
+
+
+    }
+
+
+
+};
+
+class SplitFactory
+{
+    public:
+
+    static Split* createSplit(string type,Group* group,double amount, User* userPaidBy,vector<pair<User*,double> >  edges)
+    {
+        Split* split;
+
+        if(type=="equal")
+        {
+            split=new EqualSplit(group,amount,userPaidBy, edges);
+        }
+        else if(type=="Exact")
+        {
+            split=new ExactSplit(group,amount,userPaidBy,edges);
+        }
+
+        return split;
+
+
+    }
+};
+
+
+
+int main()
+{
+    
+    Group* group=new Group("1","Mafias");
+    GroupExpenseManager* groupExpenseManager=new GroupExpenseManager();
+    GroupExpenseGraph* groupExpenseGraph=new GroupExpenseGraph();
+    group->setExpenseGraph(groupExpenseGraph);
+    group->setExpenseManager(groupExpenseManager);
+    User* user1=new User("1","Anu","v");
+    User* user2=new User("2","Ani","v");
+    User* user3=new User("3","Any","v");
+    User* user4=new User("4","Anup","v");
+    group->addUser(user1);
+    group->addUser(user2);
+    group->addUser(user3);
+    group->addUser(user4);
+    Expense* expense=new Expense();
+    pair<User*,double> p1=make_pair(user1,250.0);
+    pair<User*,double> p2=make_pair(user2,250.0);
+    pair<User*,double> p3=make_pair(user3,250.0);
+    pair<User*,double> p4=make_pair(user4,250.0);
+
+    vector<pair<User*,double> >  edges;
+    edges.push_back(p1);
+    edges.push_back(p2);
+    edges.push_back(p3);
+    edges.push_back(p4);
+   
+    GroupExpenseGraph* graph=group->getExpenseGraph();
+    Split* split=SplitFactory::createSplit("equal",group,1000.0,user1,edges);
+    split->simplifySplit();
+    
+    graph->getData();
+    graph->settleUp();
+    cout<<endl;
+    Split* split1=SplitFactory::createSplit("equal",group,2000.0,user1,edges);
+    split1->simplifySplit();
+    graph->getData();
+    graph->settleUp();
+
+    
+    
+    
+    return 0;
+}
+
+
+Output:
+
+Group created
+Graph created
+4 -250
+3 -250
+2 -250
+1 750
+4 owes 1 250
+3 owes 1 250
+2 owes 1 250
+All are settled
+
+��]�DUH��H��H�}�H5w�     0
+4 -500
+3 -500
+2 -500
+1 1500
+4 owes 1 500
+3 owes 1 500
+2 owes 1 500
+All are settled
