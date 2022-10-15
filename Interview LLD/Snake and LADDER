@@ -1,0 +1,467 @@
+
+Egde cases:
+1. Create cells which have snake/ladder and then create jump for them
+2. Pass vector in constructor for those classes where u have vector as a member.
+3. For snake start>end && ladder end>start,   for snake should not start at last Index which is the winning position
+4. Dice count + currPos should not go out ot bound, if it does next player plays as curr player can't play until he gets a lower number
+
+
+#include<iostream>
+#include<vector>
+#include<queue>
+
+using namespace std;
+
+
+class Player{
+    string playerId;
+    int currPos;
+
+    public:
+
+    Player(string playerId)
+    {
+        this->playerId=playerId;
+        currPos=0;
+        
+    }
+
+    string getPlayerId()
+    {
+        return this->playerId;
+    }
+
+    void setCurrPos(int x)
+    {
+        this->currPos=x;
+    }
+
+    int getCurrPos()
+    {
+        return this->currPos;
+    }
+
+};
+
+class Dice{
+
+    int diceCount;
+
+    public:
+
+    Dice(int diceCount)
+    {
+        this->diceCount=diceCount;
+    }
+
+    int getNumber()
+    {
+        int count=this->diceCount;
+        int number=0;
+
+        while(count>0)
+        {
+            int temp=rand()%6;
+            number+=temp;
+            count--;
+        }
+
+        return number;
+    }
+
+
+
+};
+
+class Jump{
+    int start;
+    int end;
+
+    public:
+
+    Jump(int start,int end)
+    {
+        this->start=start;
+        this->end=end;
+        cout<<"Jump created\n";
+    }
+
+    void setStart(int start)
+    {
+        this->start=start;
+    }
+
+    int getStart()
+    {
+        return this->start;
+    }
+
+    void setEnd(int end)
+    {
+        this->end=end;
+    }
+
+    int getEnd()
+    {
+        return this->end;
+    }
+
+};
+
+class Cell{
+
+    int count;
+    Jump* jump;
+
+    public:
+
+    Cell(int count)
+    {
+        this->jump=nullptr;;
+        this->count=count;
+        //cout<<"cell created with count "<<count<<endl;
+    }
+
+    void setCount(int count)
+    {
+        this->count=count;
+    }
+
+    void setJump(Jump* jump)
+    {
+        this->jump=jump;
+        //cout<<"Jump has been set\n";
+    }
+
+    Jump* getJump()
+    {
+        return this->jump;
+    }
+
+    
+
+};
+
+class Board{
+
+    vector<vector<Cell*> > board;
+    int size;
+    int snakeCount;
+    int ladderCount;
+
+    public:
+
+    Board(int size, int snakeCount, int ladderCount,vector<vector<Cell*> > board)
+    {
+        this->size=size;
+        this->snakeCount=snakeCount;
+        this->ladderCount=ladderCount;
+
+        this->board=board;
+
+        
+
+        
+
+        createSnakeAndLadder();
+    }
+
+    Cell* addCell(int row, int col)
+    {
+        board[row][col]=new Cell(row+col);
+        return board[row][col];
+    }
+
+    Cell* getCell(int row, int col)
+    {
+        return board[row][col];
+    }
+    
+
+    int getSize()
+    {
+        return this->size;
+    }
+
+    void createSnakeAndLadder()
+    {
+        int count=snakeCount;
+
+       
+
+        cout<<"Snake: \n";
+        while(count>0)
+        {   
+            
+            int start= (rand()%(size*size));
+            int end=(rand()%(size*size));
+
+            
+            //is snake start at last position no winner
+            if(end>=start || (start==size*size-1))
+            {
+                continue;
+            }
+            
+
+            Jump* snake=new Jump(start,end);
+            
+            int row=calRow(start);
+            int col=calCol(start);
+
+            Cell* snakeHead=addCell(row,col);
+            
+            
+
+            snakeHead->setJump(snake);
+            count--;
+        }
+
+       
+        count=ladderCount;
+       
+        while(count>0)
+        {
+            //cout<<"Count "<<count<<endl;
+            int start= (rand()%(size*size));
+            int end=(rand()%(size*size));
+
+            if(start>=end)
+            {
+                continue;
+            }
+            //cout<<start<<" "<<end<<endl;
+            Jump* ladder=new Jump(start,end);
+
+            int row=calRow(start);
+            int col=calCol(start);
+
+            Cell* ladderHead=addCell(row,col);
+            ladderHead->setJump(ladder);
+            count--;
+        }
+
+
+
+    }
+
+    int calRow(int start)
+    {
+        return start/size;
+    }
+
+    int calCol(int start)
+    {
+        return start%size;
+    }
+
+    
+
+
+};
+
+/*
+    12 13 14 15 16 17
+    6 7 8 9 10 11
+    0 1 2 3 4 5 
+
+col 0 1 2 3 4 5  
+
+    size=6
+
+    12%6=0
+    12/6=2 row
+
+*/
+
+
+class Game{
+
+    Board* board;
+    Dice* dice;
+    queue<Player*> playerTurn;
+    bool isWinner;
+
+    public:
+
+    Game()
+    {
+        vector<vector<Cell*> > boardBlock(6,vector<Cell*> (6,nullptr));
+        board=new Board(6,4,5, boardBlock);
+        dice=new Dice(2);
+        Player* player1=new Player("12");
+        Player* player2=new Player("23");
+        playerTurn.push(player1);
+        playerTurn.push(player2);
+        isWinner=false;
+    }
+
+    void play()
+    {
+        int size=board->getSize();
+        while(!isWinner)
+        {
+            Player* currPlayer=playerTurn.front();
+            playerTurn.pop();
+
+            int currPos=currPlayer->getCurrPos(); //get current position of player
+            int num=dice->getNumber();
+            cout<<"Dice number "<<num<<endl;
+            int playerPos=currPos+num;  //new position
+
+            cout<<"Old position: "<<currPos<<" New position: "<<playerPos<<" of player: "<<currPlayer->getPlayerId()<<endl;
+
+            if(playerPos >= (size*size))
+            {
+                currPlayer->setCurrPos(currPos);
+                playerTurn.push(currPlayer);
+
+                continue; //if out ot bound, next player plays
+            }
+
+            
+            
+
+            vector<int> coord=getPlayerPos(playerPos);
+            int rowNum=coord[0];
+            int colNum=coord[1];
+
+            //check if snake or ladder present
+
+            
+            Cell* cell=board->getCell(rowNum,colNum);
+            //cout<<cell<<endl;
+
+            if(cell)
+            {   
+                Jump* snakeOrLadder=cell->getJump();
+
+                if(snakeOrLadder)
+                {
+                    playerPos=snakeOrLadder->getEnd();
+                }
+
+            }
+            
+            currPlayer->setCurrPos(playerPos); //update player's postion
+            coord=getPlayerPos(playerPos);
+
+            if(winnerFound(currPlayer,coord[0],coord[1]))
+            {
+                cout<<currPlayer->getPlayerId()<<" is the winner \n";
+                break;
+            }
+
+            playerTurn.push(currPlayer);
+
+
+        }
+
+        isWinner=true;
+
+
+
+
+
+    }
+
+    vector<int> getPlayerPos(int currPos)
+    {
+        vector<int> coord;
+        int colNum=currPos % board->getSize();
+        
+
+        int rowNum=currPos/board->getSize();
+        
+
+        coord.push_back(rowNum);
+        coord.push_back(colNum);
+
+        return coord;
+    }
+
+    bool winnerFound(Player* player, int row, int col)
+    {
+        if(row==board->getSize()-1 && col==board->getSize()-1)
+        {
+            isWinner=true;
+            return true;
+        }
+        return false;
+
+    }
+
+
+
+
+};
+
+
+int main()
+{
+    Game* game=new Game();
+    game->play();
+
+    
+    
+
+}
+
+
+Output:
+
+Dice number 3
+Old position: 0 New position: 3 of player: 12
+Dice number 3
+Old position: 0 New position: 3 of player: 23
+Dice number 3
+Old position: 3 New position: 6 of player: 12
+Dice number 5
+Old position: 3 New position: 8 of player: 23
+Dice number 2
+Old position: 6 New position: 8 of player: 12
+Dice number 6
+Old position: 8 New position: 14 of player: 23
+Dice number 3
+Old position: 8 New position: 11 of player: 12
+Dice number 1
+Old position: 14 New position: 15 of player: 23
+Dice number 10
+Old position: 11 New position: 21 of player: 12
+Dice number 3
+Old position: 18 New position: 21 of player: 23
+Dice number 1
+Old position: 21 New position: 22 of player: 12
+Dice number 10
+Old position: 21 New position: 31 of player: 23
+Dice number 8
+Old position: 8 New position: 16 of player: 12
+Dice number 6
+Old position: 25 New position: 31 of player: 23
+Dice number 2
+Old position: 28 New position: 30 of player: 12
+Dice number 1
+Old position: 25 New position: 26 of player: 23
+Dice number 8
+Old position: 30 New position: 38 of player: 12
+Dice number 5
+Old position: 26 New position: 31 of player: 23
+Dice number 6
+Old position: 30 New position: 36 of player: 12
+Dice number 3
+Old position: 25 New position: 28 of player: 23
+Dice number 1
+Old position: 30 New position: 31 of player: 12
+Dice number 5
+Old position: 28 New position: 33 of player: 23
+Dice number 2
+Old position: 25 New position: 27 of player: 12
+Dice number 7
+Old position: 33 New position: 40 of player: 23
+Dice number 5
+Old position: 11 New position: 16 of player: 12
+Dice number 10
+Old position: 33 New position: 43 of player: 23
+Dice number 7
+Old position: 28 New position: 35 of player: 12
+12 is the winner 
