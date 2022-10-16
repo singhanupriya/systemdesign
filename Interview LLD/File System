@@ -1,0 +1,101 @@
+https://www.youtube.com/watch?v=FLkCkUY7Wu0&list=PL6W8uoQQ2c61X_9e6Net0WdYZidm7zooW&index=2
+
+Composite design pattern
+
+Note: A child class can be used in place ot its parent class.
+
+
+#include<iostream>
+#include<vector>
+
+using namespace std;
+
+
+class FileSystem{
+
+    public:
+
+    virtual void printName()=0;
+
+};
+
+class File:public FileSystem{
+
+    string fileName;
+
+    public:
+
+    File(string fileName)
+    {
+        this->fileName=fileName;
+    }
+
+    void printName()
+    {
+        cout<<"File Name: "<< this->fileName<<endl;
+    }
+};
+
+class Directory:public FileSystem{
+
+    string directoryName;
+    vector<FileSystem*> directoryObjects;
+
+    public:
+
+    Directory(string directoryName)
+    {
+        this->directoryName=directoryName;
+        
+    }
+
+    void addToDirectory(FileSystem* content)
+    {
+        directoryObjects.push_back(content);
+    }
+
+    vector<FileSystem*> getDirectoryContents()
+    {
+        return this->directoryObjects;
+    }
+
+    void printName()
+    {
+        cout<<"Directory Name: "<<this->directoryName<<endl;
+
+        for(auto it:directoryObjects)
+        {
+            it->printName();
+        }
+    }
+
+};
+
+int main()
+{
+    Directory* movie=new Directory("Movies");
+    FileSystem* file1=new File("File 1");
+    File* file2=new File("File 2");
+    Directory* horror=new Directory("Horror Movies");
+    FileSystem* horror1=new File("Horror Movie 1");
+    FileSystem* horror2=new File("Horror Movie 2");
+    Directory* comedy=new Directory("Comedy Movies");
+    FileSystem* comedy1=new File("Comedy Movie 1");
+    FileSystem* comedy2=new File("Comedy Movie 2");
+
+    movie->addToDirectory(file1);
+    movie->addToDirectory(file2);
+    movie->addToDirectory(horror);
+    horror->addToDirectory(horror1);
+    horror->addToDirectory(horror2);
+    horror->addToDirectory(comedy);
+    comedy->addToDirectory(comedy1);
+    comedy->addToDirectory(comedy2);
+    movie->printName();
+
+
+    
+
+
+
+}
