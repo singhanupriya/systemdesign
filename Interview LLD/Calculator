@@ -1,0 +1,144 @@
+Composite design pattern
+
+#include<iostream>
+
+using namespace std;
+
+class ArithmeticExpression{
+
+    public:
+
+    virtual int evaluate()=0;
+
+};
+
+class Number:public ArithmeticExpression{
+
+    int value;
+
+    public:
+
+    Number(int value)
+    {
+        this->value=value;
+    }
+
+    int evaluate()
+    {
+        cout<<"The number is "<<this->value<<endl;
+        return this->value;
+    }
+
+};
+
+enum class Operation{
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
+
+};
+
+class Expression: public ArithmeticExpression{
+
+    ArithmeticExpression* leftPart;
+    ArithmeticExpression* rightPart;
+    Operation operation;
+
+    public:
+
+    Expression(ArithmeticExpression* leftPart,ArithmeticExpression* rightPart,Operation operation)
+    {
+        this->leftPart=leftPart;
+        this->rightPart=rightPart;
+        this->operation=operation;
+    }
+
+    int evaluate()
+    {
+            int value=0;
+
+            if(operation==Operation::Add)
+            {
+                value= leftPart->evaluate() + rightPart->evaluate(); 
+            }   
+            else if(operation==Operation::Subtract)
+            {
+                value= leftPart->evaluate() - rightPart->evaluate();
+            }
+            else if(operation==Operation::Multiply)
+            {
+                value= leftPart->evaluate() * rightPart->evaluate();
+            }
+            else if(operation==Operation::Divide)
+            {
+                if(rightPart->evaluate()==0)
+                {
+                    cout<<"Division by Zero not allowed\n";
+                    
+                }
+                else
+                {
+                    value= leftPart->evaluate() / rightPart->evaluate(); 
+                }
+                
+            }   
+            else
+            {
+                cout<<"Nothing selected\n";
+            }
+                
+
+
+        
+
+            return value;
+
+
+
+    }
+
+};
+
+int main()
+{
+
+    
+    Operation add=Operation::Add;
+    Operation subtract=Operation::Subtract;
+    Operation multiply=Operation::Multiply;
+    Operation divide=Operation::Divide;
+    
+
+    //1 + (2*15)/5-2
+
+    ArithmeticExpression* a=new Number(1);
+    ArithmeticExpression* b=new Number(2);
+    ArithmeticExpression* c=new Number(15);
+    ArithmeticExpression* d=new Number(5);
+    ArithmeticExpression* e=new Number(2);
+    
+    
+    Expression* forth=new Expression(b,c,multiply);
+    
+    Expression* third=new Expression(d,e,subtract);
+    Expression* second=new Expression(forth,third,divide);
+    Expression* first=new Expression(a,second,add);
+    cout<<first->evaluate();
+    
+
+
+
+    return 0;
+}
+
+Output:
+
+The number is 1
+The number is 5
+The number is 2
+The number is 2
+The number is 15
+The number is 5
+The number is 2
+11%                                                                                                                        
