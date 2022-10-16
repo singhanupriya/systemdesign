@@ -1,0 +1,31 @@
+https://refactoring.guru/design-patterns/composite
+
+Composite is a structural design pattern that lets you compose objects into tree structures and then work with these structures as if they were individual 
+objects.
+
+
+
+Example:
+
+For example, imagine that you have two types of objects: Products and Boxes. A Box can contain several Products as well as a number of smaller Boxes. 
+These little Boxes can also hold some Products or even smaller Boxes, and so on.
+Say you decide to create an ordering system that uses these classes. Orders could contain simple products without any wrapping, as well as boxes stuffed 
+with products...and other boxes. 
+How would you determine the total price of such an order?
+
+How would this method work? For a product, it’d simply return the product’s price. For a box, it’d go over each item the box contains, 
+ask its price and then return a total for this box. If one of these items were a smaller box, 
+that box would also start going over its contents and so on, until the prices of all inner components were calculated. 
+A box could even add some extra cost to the final price, such as packaging cost.
+
+Similar to sum of all nodes in a binary tree.
+
+
+Real-World Analogy
+
+An example of a military structure
+An example of a military structure.
+Armies of most countries are structured as hierarchies. 
+An army consists of several divisions; a division is a set of brigades, and a brigade consists of platoons, which can be broken down into squads. 
+Finally, a squad is a small group of real soldiers. Orders are given at the top of the hierarchy and passed down onto each level until every soldier 
+knows what needs to be done.
