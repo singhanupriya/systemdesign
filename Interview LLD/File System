@@ -99,3 +99,16 @@ int main()
 
 
 }
+
+
+Output:
+
+Directory Name: Movies
+File Name: File 1
+File Name: File 2
+Directory Name: Horror Movies
+File Name: Horror Movie 1
+File Name: Horror Movie 2
+Directory Name: Comedy Movies
+File Name: Comedy Movie 1
+File Name: Comedy Movie 2
