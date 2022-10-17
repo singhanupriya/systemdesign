@@ -1,0 +1,352 @@
+Pending: The queue system should be multi-threaded, i.e., messages can be produced or consumed in parallel by different producers/consumers.
+
+https://workat.tech/machine-coding/practice/design-distributed-queue-cuudq0sk0v14
+
+
+Classes:
+1. Producer
+2. Consumer
+3. Topic --- factory--- analytics and notification
+4. TopicFactory
+5. DistributedQueue
+6. Kafka(driver class)
+7. Subscription
+
+
+Design patterns used:
+1. Factory
+2. Observer
+
+
+#include<iostream>
+#include<vector>
+#include<queue>
+
+using namespace std;
+
+class Topic;
+class Producer{
+    string producerId;
+
+    public:
+
+    Producer(string producerId)
+    {
+        this->producerId=producerId;
+    }
+
+    string getProducerId()
+    {
+        return this->producerId;
+    }
+
+    Topic* publish(Topic* topic)
+    {
+        return topic;
+    }
+
+    
+
+};
+
+class Consumer{
+
+    string consumerId;
+    vector<Topic*> consumerTopics;
+
+    public:
+
+    Consumer(string consumerId)
+    {
+        this->consumerId=consumerId;
+    }
+
+    void subscribeTopic(Topic* topic)
+    {
+        this->consumerTopics.push_back(topic);
+        
+
+    }
+
+    void unSubscribeTopic(Topic* topic)
+    {
+        auto it=find(consumerTopics.begin(),consumerTopics.end(),topic);
+        if(it==consumerTopics.end())
+        {
+            cout<<"Not subscribed to this topic\n";
+            return;
+        }
+
+        consumerTopics.erase(it);
+    }
+
+    vector<Topic*> getTopicsSubscriber()
+    {
+        return this->consumerTopics;
+    }
+
+    void listen(string msg)
+    {
+        cout<<this->consumerId<<" received "<<msg<<endl;
+    }
+};
+
+class Topic{
+
+    protected:
+    string topicId;
+    string message;
+    vector<Consumer*> consumerSubscribed;
+
+    public:
+
+    Topic(string topicId, string message)
+    {
+        this->topicId=topicId;
+        this->message=message;
+    }
+
+    string getTopicId()
+    {
+        return this->topicId;
+    }
+
+    void addConsumer(Consumer* consumer)
+    {
+        this->consumerSubscribed.push_back(consumer);
+    }
+
+    void removeConsumer(Consumer* consumer)
+    {
+        auto it=find(consumerSubscribed.begin(),consumerSubscribed.end(),consumer);
+        if(it==consumerSubscribed.end())
+        {
+            cout<<"Consumer is not subscribed\n";
+            return;
+        }
+        this->consumerSubscribed.erase(it);
+    }
+
+    virtual void performEvent()=0;
+
+
+
+};
+
+class AnalyticTopic:public Topic{
+
+    public:
+    AnalyticTopic(string topicId,string message):Topic(topicId,message)
+    {
+        cout<<"Create analytics topic\n";
+    }
+
+    void performEvent()
+    {   
+        for(auto it:consumerSubscribed)
+        {
+            it->listen(message);
+        }
+
+    }
+
+};
+
+class NotificationTopic:public Topic{
+
+    public:
+    NotificationTopic(string topicId,string message):Topic(topicId,message)
+    {
+        cout<<"Create notification topic\n";
+    }
+
+    void performEvent()
+    {   
+        for(auto it:consumerSubscribed)
+        {
+            it->listen(message);
+        }
+
+    }
+
+};
+
+class TopicFactory{
+
+    public:
+
+    static Topic* createTopic(string type, string Id, string msg)
+    {
+        Topic* topic;
+
+        if(type=="Notification")
+        {
+            topic=new NotificationTopic(Id,msg);
+        }
+        else if(type=="Analytics")
+        {
+            topic=new AnalyticTopic(Id,msg);
+        }
+
+        return topic;
+    }
+
+};
+
+class Subscription{
+
+    Consumer* consumer;
+    Topic* topic;
+
+    public:
+
+    Subscription(Consumer* consumer, Topic* topic)
+    {
+        this->consumer=consumer;
+        this->topic=topic;
+    }
+
+    void createSubscription(Consumer* consumer, Topic* topic)
+    {
+        consumer->subscribeTopic(topic);
+        topic->addConsumer(consumer);
+    }
+
+    void cancelSubscription(Consumer* consumer, Topic* topic)
+    {
+        consumer->unSubscribeTopic(topic);
+        topic->removeConsumer(consumer);
+    }
+
+};
+
+
+class DistributedQueue{
+
+    queue<Topic*> kafkaQueue;
+
+    public:
+
+
+    void addToQueue(Topic* topic)
+    {
+        kafkaQueue.push(topic);
+    }
+
+    Topic* getQueueFront()
+    {
+        return kafkaQueue.front();
+    }
+
+    void removeFromQueue()
+    {
+        kafkaQueue.pop();
+    }
+
+};
+
+
+class Kafka{
+
+    vector<Producer*> producerList;
+    vector<Consumer*> consumerList;
+    DistributedQueue* queue;
+
+    public:
+
+    Kafka()
+    {
+        queue=new DistributedQueue();
+        
+    }
+
+    
+      void addProducer(Producer* producer)
+      {
+          producerList.push_back(producer);
+      }  
+
+      void addConsumers(Consumer* consumer)
+      {
+          consumerList.push_back(consumer);
+      }
+
+      
+
+    void producerPush(Producer* producer, Topic* topic)
+    {
+        Topic* topic1=producer->publish(topic);
+        queue->addToQueue(topic1);
+        cout<<producer->getProducerId()<<" published "<<topic1->getTopicId()<<endl;
+        topic1->performEvent();
+
+    }
+
+    
+
+};
+
+int main()
+{
+    Kafka* kafka=new Kafka();
+
+    Producer* producer1=new Producer("Producer 1");
+       
+        Producer* producer2=new Producer("Producer 2");
+        
+        Consumer* consumer1=new Consumer("Consumer 1");
+        
+        Consumer* consumer2=new Consumer("Consumer 2");
+        
+        Consumer* consumer3=new Consumer("Consumer 3");
+        
+        Consumer* consumer4=new Consumer("Consumer 4");
+        
+        Consumer* consumer5=new Consumer("Consumer 5");
+
+        kafka->addProducer(producer1);
+        kafka->addProducer(producer2);
+        kafka->addConsumers(consumer1);
+        kafka->addConsumers(consumer2);
+        kafka->addConsumers(consumer3);
+        kafka->addConsumers(consumer4);
+        kafka->addConsumers(consumer5);
+        
+
+    Topic* topic1=TopicFactory::createTopic("Notification","Topic 1","Topic 1");
+    Topic* topic2=TopicFactory::createTopic("Analytics","Topic 2","Topic 2");
+
+        Subscription* subscription1= new Subscription(consumer1,topic1);
+        subscription1->createSubscription(consumer1,topic1);
+
+        Subscription* subscription2= new Subscription(consumer2,topic1);
+        subscription2->createSubscription(consumer2,topic1);
+
+        Subscription* subscription3= new Subscription(consumer3,topic2);
+        subscription3->createSubscription(consumer3,topic2);
+
+        Subscription* subscription4= new Subscription(consumer4,topic2);
+        subscription4->createSubscription(consumer4,topic2);
+
+        Subscription* subscription5= new Subscription(consumer5,topic2);
+        subscription5->createSubscription(consumer5,topic2);
+
+        Subscription* subscription6= new Subscription(consumer1,topic2);
+        subscription6->createSubscription(consumer1,topic2);
+
+        kafka->producerPush(producer1,topic1);
+        kafka->producerPush(producer2,topic2);
+
+
+    return 0;
+}
+
+Output:
+Producer 1 published Topic 1
+Consumer 1 received Topic 1
+Consumer 2 received Topic 1
+Producer 2 published Topic 2
+Consumer 3 received Topic 2
+Consumer 4 received Topic 2
+Consumer 5 received Topic 2
+Consumer 1 received Topic 2
