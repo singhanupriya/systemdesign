@@ -1,0 +1,441 @@
+https://workat.tech/machine-coding/practice/trello-problem-t0nwwqt61buz
+
+Object created:
+
+1. BoardManager- vector<board>
+2. Board - ListManager, UserManager
+3. ListManager-vector<List> //adding/removing list from board
+4. List-CardManager
+5. CardManager-vector<Card> //adding/removing card from list
+6. Card
+7. UserManager-vector<User> //adding/removing members from board
+8. User
+
+Optimisation:
+BoardManager can also have map<board,vector<list>> and map<list,<vector<card>>
+
+
+/*
+
+User: Each user should have a userId, name, email.
+Board: Each board should have a id, name, privacy (PUBLIC/PRIVATE), url, members, lists
+List: Each list should have a id, name and cards
+Card: Each card should have a id, name, description, assigned user
+We should be able to create/delete boards, add/remove people from the members list and modify attributes. Deleting a board should delete all lists inside it.
+We should be able to create/delete lists and modify attributes. Deleting a list should delete all cards inside it.
+We should be able to create/delete cards, assign/unassign a member to the card and modify attributes
+We should also be able to move cards across lists in the same board
+Ability to show all boards, a single board, a single list and a single card
+Default privacy should be public
+Cards should be unassigned by default
+Ids should be auto-generated for board/list/card
+URLs should get created based on the id
+
+
+*/
+
+
+#include<iostream>
+#include<vector>
+#include<string>
+
+using namespace std;
+
+class UserManager;
+class ListManager;
+class CardManager;
+
+
+class User{
+    string userId;
+    string username;
+    string userEmail;
+
+    public:
+
+    User(string userId,string username, string userEmail)
+    {
+        this->userId=userId;
+        this->username=username;
+        this->userEmail=userEmail;
+    }
+
+    void setUserEmail(string email)
+    {
+        this->userEmail=email;
+    }
+
+    string getUserId()
+    {
+        return this->userId;
+    }
+
+    string getUserEmail()
+    {
+        return this->userEmail;
+    }
+
+};
+
+enum class Privacy{
+    Public,
+    Private,
+
+};
+
+
+class UserManager{
+
+    vector<User*> userList;
+
+    public:
+
+    void addUser(User* user)
+    {
+        userList.push_back(user);
+    }
+
+    void removeUser(User* user)
+    {
+        auto it=find(userList.begin(),userList.end(),user);
+        userList.erase(it);
+    }
+
+    vector<User*> getUserList()
+    {
+        return this->userList;
+    }
+
+};
+
+
+class Card{
+
+    string cardId;
+    string cardDescription;
+    User* userAssigned;
+
+    public:
+
+    Card()
+    {
+        this->cardId=to_string(rand()%13);
+        this->userAssigned=nullptr;
+    }
+
+    void assignUser(User* user)
+    {
+        this->userAssigned=user;
+    }
+
+    void removeUserAssigned()
+    {
+        this->userAssigned=nullptr;
+    }
+    
+    User* getUserAssigned()
+    {
+        return this->userAssigned;
+    }
+
+    void setCardDescription(string description)
+    {
+        this->cardDescription=description;
+    }
+
+    string getCardDescription()
+    {
+        return this->cardDescription;
+    }
+
+    string getCardId()
+    {
+        return this->cardId;
+    }
+
+};
+
+
+class CardManager{
+
+    vector<Card*> cardList;
+
+    public:
+
+    void addCardToList(Card* card)
+    {
+        cardList.push_back(card);
+    }
+
+    void removeCardFromList(Card* card)
+    {
+        auto it=find(cardList.begin(),cardList.end(),card);
+        cardList.erase(it);
+    }
+
+    vector<Card*> getCardList()
+    {
+        return this->cardList;
+    }
+
+};
+
+class List{
+    string listId;
+    string listName;
+    CardManager* cardManager;
+
+    public:
+
+    List(string listName)
+    {
+        this->listName=listName;
+        this->listId=to_string(rand()%13);
+        cardManager=new CardManager();
+    }
+
+    string getListName()
+    {
+        return this->listName;
+    }
+
+    string getListId()
+    {
+        return this->listId;
+    }
+
+    CardManager* getCardManager()
+    {
+        return this->cardManager;
+    }
+
+
+};
+
+class ListManager{
+
+    vector<List*> boardList;
+
+    public:
+
+    ListManager()
+    {
+
+    }
+
+    void addList(List* list)
+    {
+        boardList.push_back(list);
+    }
+
+    void removeList(List* list)
+    {
+        auto it=find(boardList.begin(),boardList.end(),list);
+        boardList.erase(it);
+    }
+
+    vector<List*> getBoardList()
+    {
+        return this->boardList;
+    }
+
+};
+
+
+
+
+class Board{
+    string boardId;
+    string boardName;
+    Privacy privacy;
+    string url;
+    UserManager* userManager;
+    ListManager* listManager;
+    
+    
+
+    public:
+
+    Board()
+    {
+        this->boardId=to_string(rand()%13);
+        this->privacy=Privacy::Public;
+        userManager=new UserManager();
+        listManager=new ListManager();
+        
+        
+    }
+
+    void setBoardName(string name)
+    {
+        this->boardName=name;
+    }
+
+    string getBoardName()
+    {
+        return this->boardName;
+    }
+
+    UserManager* getUserManager()
+    {
+        return this->userManager;
+    }
+
+    ListManager* getListManager()
+    {
+        return this->listManager;
+    }
+
+    
+
+    
+
+    void shuffleCard(List* oldList,List* newList, Card* card)
+    {
+        CardManager* oldListCardManager=oldList->getCardManager();
+        oldListCardManager->removeCardFromList(card);
+        CardManager* newListCardManager=newList->getCardManager();
+        newListCardManager->addCardToList(card);
+       
+    }
+
+};
+
+class BoardManager{
+
+    vector<Board*> boardList;
+
+    public:
+
+    void addBoard(Board* board)
+    {
+        boardList.push_back(board);
+    }
+
+    void removeBoard(Board* board)
+    {
+        auto it=find(boardList.begin(),boardList.end(),board);
+        boardList.erase(it);
+    }
+
+    vector<Board*> getAllBoards()
+    {
+        return this->boardList;
+    }
+
+};
+
+int main()
+{
+    BoardManager* boardManager=new BoardManager();
+
+    Board* board1=new Board();
+    board1->setBoardName("Board 1");
+
+    Board* board2=new Board();
+    board2->setBoardName("Board 2");
+
+    boardManager->addBoard(board1);
+    boardManager->addBoard(board2);
+
+    List* list1=new List("List 1");
+    List* list2=new List("List 2");
+    List* list3=new List("List 3");
+    List* list4=new List("List 4");
+
+    ListManager* managerBoardOne=board1->getListManager();
+    managerBoardOne->addList(list1);
+    managerBoardOne->addList(list3);
+
+    ListManager* managerBoardTwo=board2->getListManager();
+    managerBoardTwo->addList(list2);
+    managerBoardTwo->addList(list4);
+
+    Card* card1=new Card();
+    card1->setCardDescription("Card 1");
+    Card* card2=new Card();
+    card2->setCardDescription("Card 2");
+    Card* card3=new Card();
+    card3->setCardDescription("Card 3");
+
+    CardManager* listOne=list1->getCardManager();
+    listOne->addCardToList(card1);
+
+    CardManager* listTwo=list2->getCardManager();
+    listTwo->addCardToList(card2);
+
+    CardManager* listThree=list3->getCardManager();
+    listThree->addCardToList(card3);
+
+    cout<<"Boards: \n";
+    vector<Board*> boardList=boardManager->getAllBoards();
+    for(auto it:boardList)
+    {
+        cout<<"Board: "<<it->getBoardName()<<endl;
+        ListManager* listManager=it->getListManager(); 
+        vector<List*> allList=listManager->getBoardList();
+        for(auto it1:allList)
+        {
+            cout<<"List :"<<it1->getListName()<<endl;
+            CardManager* cardManager=it1->getCardManager();
+
+            vector<Card*> allCard=cardManager->getCardList();
+            for(auto it2:allCard)
+            {
+                cout<<"Card "<<it2->getCardDescription()<<endl;
+            }
+        }
+    }
+
+    board1->shuffleCard(list1,list3,card1);
+
+
+    cout<<"Post shuffling:\n";
+
+    for(auto it:boardList)
+    {
+        cout<<"Board: "<<it->getBoardName()<<endl;
+        ListManager* listManager=it->getListManager(); 
+        vector<List*> allList=listManager->getBoardList();
+        for(auto it1:allList)
+        {
+            cout<<"List :"<<it1->getListName()<<endl;
+            CardManager* cardManager=it1->getCardManager();
+
+            vector<Card*> allCard=cardManager->getCardList();
+            for(auto it2:allCard)
+            {
+                cout<<"Card "<<it2->getCardDescription()<<endl;
+            }
+        }
+    }
+
+   
+    return 0;
+}
+
+
+
+Output:
+
+Boards: 
+Board: Board 1
+List :List 1
+Card Card 1
+List :List 3
+Card Card 3
+Board: Board 2
+List :List 2
+Card Card 2
+List :List 4
+Post shuffling:
+Board: Board 1
+List :List 1
+List :List 3
+Card Card 3
+Card Card 1
+Board: Board 2
+List :List 2
+Card Card 2
+List :List 4
+anuprsi2@ANUPRSI2-M-G1NT Trello % 
