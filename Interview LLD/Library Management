@@ -1,0 +1,688 @@
+https://workat.tech/machine-coding/practice/design-library-management-system-jgjrv8q8b136
+
+/*
+
+Create a command-line application for the library management system with the following requirements.
+
+Details about the Library:
+The library will have one or more copies of multiple books
+The library will have multiple racks and each rack can contain at most one copy of any book.
+Each book will have the following properties:
+Book ID
+Title
+Authors
+Publishers
+Details about Book Copies
+There could be multiple copies of the same book.
+Each book copy will have a unique ID.
+Each book copy will be placed on a rack.
+Each book copy can be borrowed by a user with a specific due date.
+Every rack will have a unique rack number (numbered serially from 1 to n where n is the total number of racks).
+Details about User:
+User details: User ID, Name
+A user can borrow a maximum of 5 books.
+The functions that the library management system can do:
+Create a library.
+Add a book to the library. The book should be added to the first available rack.
+Remove a book copy from the library.
+Allow a user to borrow a book copy given the book id, user id, and due date. The first available copy based on the rack number should be provided.
+Allow a user to borrow a book copy given the book copy id, user id, and due date.
+Allow a user to return a book copy given the book copy id. The book should be added to the first available rack.
+Allow a user to print the book copy ids of all the books borrowed by them.
+Allow a user to search for books using few book properties (Book ID, Title, Author, Publisher). Searching should return details about all the book copies that match the search query.
+
+
+*/
+
+
+#include<iostream>
+#include<vector>
+#include<unordered_map>
+#include<string> 
+
+using namespace std;
+
+class Rack;
+class BookCopy;
+class LibraryUserAccount;
+class Person;
+class Reservation;
+class Payment;
+class Book;
+
+
+class Address
+{
+    string street;
+    string city;
+    string state;
+    string country;
+    int pincode;
+
+    public:
+    Address()
+    {
+
+    }
+    
+};
+
+
+
+class Person{
+
+    string username;
+    string userEmail;
+
+    public:
+
+    Person(string username, string email)
+    {
+        this->username=username;
+        this->userEmail=email;
+    }
+
+    string getUsername()
+    {
+        return this->username;
+
+    }
+
+    string getUserEmail()
+    {
+        return this->userEmail;
+    }
+
+};
+
+
+
+class Publisher{
+    string publicationId;
+    string publicationName;
+    Address* address;
+
+    public:
+
+    Publisher(string publicationId, string publicationName,Address* address)
+    {
+        this->publicationId=publicationId;
+        this->publicationName=publicationName;
+        this->address=address;
+    }
+
+    string getPublicationId()
+    {
+        return this->publicationId;
+    }
+
+    string getPublicationName()
+    {
+        return this->publicationName;
+    }
+
+};
+
+class Floor{
+    string floorId;
+    vector<Rack*> racksOnFloor;
+
+    public:
+
+    Floor(string floorId)
+    {
+        this->floorId=floorId;
+    }
+
+    void addRack(Rack* rack)
+    {
+        racksOnFloor.push_back(rack);
+    }
+
+    void removeRack(Rack* rack)
+    {
+        auto it=find(racksOnFloor.begin(),racksOnFloor.end(),rack);
+        racksOnFloor.erase(it);
+    }
+
+    vector<Rack*> getRacksOnFloor()
+    {
+        return this->racksOnFloor;
+    }
+
+
+
+};
+
+class Rack{
+    string rackId;
+    BookCopy* bookPlaced;
+
+    public:
+
+    Rack(string rackId)
+    {
+        this->rackId=rackId;
+    }
+
+    bool isEmpty()
+    {
+        return this->bookPlaced==nullptr;
+    }
+
+    BookCopy* getBookOnRack()
+    {
+        return this->bookPlaced;
+    }
+
+    void removeBookFromRack()
+    {
+        this->bookPlaced=nullptr;
+    }
+
+    void addBookOnRack(BookCopy* bookCopy)
+    {
+        this->bookPlaced=bookCopy;
+    }
+
+
+};
+
+class BookCopy{
+
+    string bookCopyID;
+    bool isAvailable;
+    Rack* rackLocation;
+    LibraryUserAccount* personAssigned; 
+    double borrowPricePerDay;
+
+    public:
+
+    BookCopy(string bookCopyId)
+    {
+        this->bookCopyID=bookCopyId;
+        
+        this->isAvailable=true;
+    }
+
+    void setBorrowPricePerDay(double price)
+    {
+        this->borrowPricePerDay=price;
+    }
+
+    double getBorrowPricePerDay()
+    {
+        return this->borrowPricePerDay;
+    }
+
+    string getBookCopyId()
+    {
+        return this->bookCopyID;
+    }
+
+    bool getAvailabilityOfBook()
+    {
+        return this->isAvailable;
+    }
+
+    void assignBook(LibraryUserAccount* user)
+    {
+        this->personAssigned=user;
+        this->isAvailable=false;
+    }
+
+    LibraryUserAccount* getUserAssigned()
+    {
+        return this->personAssigned;
+    }
+
+    void unassignBook()
+    {
+        this->personAssigned=nullptr;
+        this->isAvailable=true;
+    }
+
+
+
+
+};
+
+class Book{
+
+    string bookId;
+    string title;
+    vector<Person*> author;
+    Publisher* publisher;
+    vector<BookCopy*> bookCopies;
+
+    public:
+
+    Book(string bookId,string title, vector<Person*> author, Publisher* publisher)
+    {
+        this->bookId=bookId;
+        this->title=title;
+        this->author=author;
+        this->publisher=publisher;
+    }
+
+    void addBookCopy(BookCopy* bookCopy)
+    {
+        this->bookCopies.push_back(bookCopy);
+    }
+
+    vector<BookCopy*> getBookCopies()
+    {
+        return this->bookCopies;
+    }
+
+    void removeBookCopy(BookCopy* bookCopy)
+    {
+        auto it=find(bookCopies.begin(),bookCopies.end(),bookCopy);
+        this->bookCopies.erase(it);
+    }
+
+    string getBookTitle()
+    {
+        return this->title;
+    }
+
+
+};
+
+class LibraryUserAccount:public Person{
+    vector<Reservation*> userReservation;
+    int bookBorrowed;
+    
+    public:
+
+    LibraryUserAccount(string username, string email):Person(username,email)
+    {
+        this->bookBorrowed=0;
+    }
+
+    vector<Reservation*> getUserReservation()
+    {
+        this->userReservation;
+    }
+
+    void addUserReservation(Reservation* reservation)
+    {
+        this->userReservation.push_back(reservation);
+        this->bookBorrowed++;
+    }
+
+    int getBooksBorrowedByUser()
+    {
+        return this->bookBorrowed;
+    }
+
+    void returnBook(Reservation* reservation)
+    {
+        auto it=find(userReservation.begin(),userReservation.end(),reservation);
+        this->userReservation.erase(it);
+        this->bookBorrowed--;
+    }
+
+
+
+};
+
+class BookInventory{
+    vector<Book*> listOfBooks; //book has list of copies
+
+    public:
+
+    void addBook(Book* book)
+    {
+        this->listOfBooks.push_back(book);
+    }
+
+    vector<Book*> getAllLibraryBooks()
+    {
+        return this->listOfBooks;
+    }
+
+    void removeBook(Book* book)
+    {
+        auto it=find(listOfBooks.begin(),listOfBooks.end(),book);
+        this->listOfBooks.erase(it);
+    }
+
+    
+
+};
+
+class Date{
+    int day;
+    int month;
+    int year;
+
+    public:
+
+    Date()
+    {
+
+    }
+
+    Date(int day, int month, int year)
+    {
+        this->day=day;
+        this->month=month;
+        this->year=year;
+    }
+
+};
+
+enum class PaymentMethod{
+    Card,
+    Cash,
+    UPI,
+
+};
+
+class Payment{
+    string paymentId;
+    double amount;
+    Date dateOfPayment;
+    PaymentMethod paymentMethod;
+
+};
+
+class Reservation{
+    string reservationId;
+    BookCopy* bookBorrowed;
+    LibraryUserAccount* userIssuer;
+    Date dateOfIssue;
+    Date dueDate;
+    Payment* payment;
+
+    public:
+
+    Reservation(string reservationId, BookCopy* bookBorrowed, LibraryUserAccount* user)
+    {
+        this->reservationId;
+        this->bookBorrowed=bookBorrowed;
+        this->userIssuer=user;
+    }
+
+    void getReservationDetails()
+    {
+        cout<<"Reservation Id: "<<this->reservationId<<endl;
+        cout<<"Book Issued: "<<this->bookBorrowed->getBookCopyId()<<endl;
+        cout<<"User Issued to: "<<this->userIssuer->getUsername()<<endl;
+    }
+
+    LibraryUserAccount* getUserIssuedTo()
+    {
+        return this->userIssuer;
+    }
+
+    BookCopy* getBookBorrowed()
+    {
+        return this->bookBorrowed;
+    }
+
+
+
+
+
+    
+
+};
+
+class ReservationInventory{
+    vector<Reservation*> libraryReservations;
+
+    public:
+
+    vector<Reservation*> getAllReservation()
+    {
+        return this->libraryReservations;
+    }
+
+    void addReservation(Reservation* reservation)
+    {
+        this->libraryReservations.push_back(reservation);
+    }
+
+};
+
+
+class Library{
+
+    string libraryId;
+    string libraryName;
+    Address* address;
+    BookInventory* bookInventory;
+    ReservationInventory* reservationInventory;
+
+    public:
+
+    Library(string libraryId,string libraryName)
+    {
+        this->libraryId=libraryId;
+        this->libraryName=libraryName;
+        
+        this->bookInventory=new BookInventory();
+        this->reservationInventory=new ReservationInventory();
+    }
+
+    string getLibraryId()
+    {
+        
+        return this->libraryId;
+    }
+
+    
+
+    Reservation* issueBook(Book* book, LibraryUserAccount* user)
+    {
+
+        int booksBorrowed=user->getBooksBorrowedByUser();
+        BookCopy* bookCopy=nullptr;
+
+        if(booksBorrowed<5)
+        {
+            vector<BookCopy*> bookCopies=book->getBookCopies();
+            for(auto it:bookCopies)
+            {
+                if(it->getAvailabilityOfBook())
+                {
+                    bookCopy=it;
+                    break;
+                }
+            }
+
+            if(bookCopy==nullptr)
+            {
+                cout<<"Book Not Available\n";
+                return nullptr;
+            }
+
+            bookCopy->assignBook(user);
+        }
+        else{
+
+            cout<<"You have already issued 5 books\n";
+            return nullptr;
+        }
+
+        Reservation* userReservation=new Reservation("123", bookCopy,user);
+        user->addUserReservation(userReservation);
+        this->reservationInventory->addReservation(userReservation);
+        return userReservation;
+        
+    }
+    
+    
+
+
+
+
+
+};
+
+
+class LibraryManagement{
+
+    vector<Library*> listOfLibraries;
+
+    public:
+
+    LibraryManagement(vector<Library*> libraries)
+    {
+        this->listOfLibraries=libraries;
+        //cout<<"Hello: "<<this->listOfLibraries.size()<<endl;
+    }
+
+    void addLibrary(Library* library)
+    {
+        this->listOfLibraries.push_back(library);
+    }
+
+    vector<Library*> getLibraries()
+    {
+        return this->listOfLibraries;
+    }
+
+    Reservation* issueBook(Library* library, Book* book, LibraryUserAccount* user)
+    {
+        return library->issueBook(book,user);
+    }
+
+    void returnBook(Library* library, Reservation* reservation)
+    {
+        LibraryUserAccount* user = reservation->getUserIssuedTo();
+        user->returnBook(reservation);
+        BookCopy* bookBorrowed=reservation->getBookBorrowed();
+        bookBorrowed->unassignBook();
+        
+        cout<<"Book has been returned\n";
+        
+    }
+
+};
+
+
+
+int main()
+{
+   LibraryUserAccount* user1=new LibraryUserAccount("User 1","email");
+    LibraryUserAccount* user2=new LibraryUserAccount("User 2","email");
+    LibraryUserAccount* user3=new LibraryUserAccount("User 3","email");
+
+    Library* library1=new Library("1","library1");
+    Library* library2=new Library("2","library2");
+    
+    
+    vector<Library*> libraries;
+    libraries.push_back(library1);
+    libraries.push_back(library2);
+
+    
+    
+    
+    //cout<<libraries.size()<<endl;
+
+
+    LibraryManagement* libraryManagement=new LibraryManagement(libraries);
+
+    
+    vector<Library*> mgtLibraries=libraryManagement->getLibraries();
+    cout<<"List of Libraries:\n";
+    
+    for(int i=0;i<mgtLibraries.size();i++)
+    {
+        cout<<"Library: "<<mgtLibraries[i]->getLibraryId()<<endl;
+    }
+
+    Person* author=new Person("author 1","email");
+
+    vector<Person*> authorList;
+    authorList.push_back(author);
+    Address* add1=new Address();
+    Publisher* publisher=new Publisher("pub1","pub1",add1);
+    Book* book1=new Book("book1","book1",authorList,publisher);
+
+    BookCopy* copy1=new BookCopy("copy 1");
+    
+    BookCopy* copy2=new BookCopy("copy 2");
+
+    book1->addBookCopy(copy1);
+    book1->addBookCopy(copy2);
+
+    
+    Reservation* user1Reservation=libraryManagement->issueBook(library1,book1,user1);
+    cout<<"Your reservation status: \n";
+    user1Reservation->getReservationDetails();
+
+    cout<<endl;
+
+    Reservation* user2Reservation=libraryManagement->issueBook(library1,book1,user2);
+    cout<<"Your reservation status: \n";
+    user2Reservation->getReservationDetails();
+
+    cout<<endl;
+
+    cout<<"Your reservation status: \n";
+    Reservation* user3Reservation=libraryManagement->issueBook(library1,book1,user3);
+    
+    if(user3Reservation)
+    {
+        user3Reservation->getReservationDetails();
+
+    }
+
+    cout<<endl;
+    
+    //user 1 returns book
+
+    libraryManagement->returnBook(library1,user1Reservation);
+    cout<<endl;
+
+    //user 3 tries to book again
+
+    cout<<"Your reservation status: \n";
+    user3Reservation=libraryManagement->issueBook(library1,book1,user3);
+    
+    if(user3Reservation)
+    {
+        user3Reservation->getReservationDetails();
+
+    }
+    
+    
+
+    
+
+
+    return 0;
+
+}
+
+Output:
+
+List of Libraries:
+Library: 1
+Library: 2
+
+Your reservation status: 
+Reservation Id: 
+Book Issued: copy 1
+User Issued to: User 1
+
+Your reservation status: 
+Reservation Id: 
+Book Issued: copy 2
+User Issued to: User 2
+
+Your reservation status: 
+Book Not Available
+
+Book has been returned
+
+Your reservation status: 
+Reservation Id: 
+Book Issued: copy 1
+User Issued to: User 3
+anuprsi2@ANUPRSI2-M-G1NT Library management % 
