@@ -1,0 +1,194 @@
+
+
+//decorator 
+
+Learning:
+
+1. In child class, if u want to set parent's class member attribute do Parent::cost=cost
+2. Child pointer can be used in place of parent's pointer
+
+Abstract base class -----child ------> 1. Concrete class    +      2. Abstract Decorator class (Contains abstract class obj as attribute)
+Abstract Decorator class (Contains abstract class obj as attribute)-----child-----> concrete decocator
+
+
+
+#include<iostream>
+
+using namespace std;
+
+class PizzaBase{
+
+    protected:
+
+    double cost;
+
+    public:
+
+    virtual void setCost(double cost)=0;
+    virtual double getBill()=0;
+
+};
+
+class FreshPanPizzaBase:public PizzaBase{
+
+    public:
+
+    void setCost(double cost)
+    {
+        PizzaBase::cost=cost;
+        
+    }
+
+    double getBill()
+    {
+        return cost;
+    }
+
+
+
+};
+
+class WheatCrustPizzaBase:public PizzaBase{
+
+    public:
+
+    void setCost(double cost)
+    {
+        PizzaBase::cost=cost;
+    }
+
+    double getBill()
+    {
+        return cost;
+    }
+
+
+
+};
+
+class PizzaToppingsDecorator:public PizzaBase{
+
+    protected:
+
+    PizzaBase* pizzaBase;
+
+    public:
+
+    PizzaToppingsDecorator(PizzaBase* pizzaBase)
+    {
+        this->pizzaBase=pizzaBase;
+    }
+
+};
+
+class OnionTopping: public PizzaToppingsDecorator{
+
+    protected:
+
+    
+
+    public:
+
+    OnionTopping(PizzaBase* pizzaBase):PizzaToppingsDecorator(pizzaBase)
+    {
+
+    }
+
+    void setCost(double cost)
+    {
+        PizzaBase::cost=cost;
+    }
+
+    double getBill()
+    {
+        return pizzaBase->getBill() + cost;
+    }
+
+};
+
+class CapsicumTopping: public PizzaToppingsDecorator{
+
+    protected:
+
+    
+
+    public:
+
+    CapsicumTopping(PizzaBase* pizzaBase):PizzaToppingsDecorator(pizzaBase)
+    {
+
+    }
+
+    void setCost(double cost)
+    {
+        PizzaBase::cost=cost;
+    }
+
+    double getBill()
+    {
+        return pizzaBase->getBill() + cost;
+    }
+
+};
+
+class ExtraCheeseTopping: public PizzaToppingsDecorator{
+
+    protected:
+
+    
+
+    public:
+
+    ExtraCheeseTopping(PizzaBase* pizzaBase):PizzaToppingsDecorator(pizzaBase)
+    {
+
+    }
+
+    void setCost(double cost)
+    {
+        PizzaBase::cost=cost;
+    }
+
+    double getBill()
+    {
+        return pizzaBase->getBill() + cost;
+    }
+
+};
+
+int main()
+{
+    FreshPanPizzaBase* freshBase=new FreshPanPizzaBase();
+    freshBase->setCost(300.0);
+    cout<<"Base charge: "<<freshBase->getBill()<<endl;
+
+    PizzaBase* wheatBase=new WheatCrustPizzaBase();
+    wheatBase->setCost(450.0);
+
+    OnionTopping* onionTopping=new OnionTopping(freshBase);
+    onionTopping->setCost(150.0);
+
+    cout<<"Onion topping charges: "<<onionTopping->getBill()<<endl;
+
+    CapsicumTopping* capsicumTopping=new CapsicumTopping(onionTopping); //child can be used in place of parent 
+    //base --child---> topping decorator---child--->onion topping
+    capsicumTopping->setCost(100);
+
+    cout<<"Capsicum topping charges: "<<capsicumTopping->getBill()<<endl; //fresh base + onion + capsicum
+
+
+    ExtraCheeseTopping* extraCheeseTopping= new ExtraCheeseTopping(capsicumTopping);
+    extraCheeseTopping->setCost(125);
+
+    cout<<"Total cost "<<extraCheeseTopping->getBill()<<endl;
+
+
+
+    return 0;
+}
+
+Output:
+Base charge: 300
+Onion topping charges: 450
+Capsicum topping charges: 550
+Total cost 675
