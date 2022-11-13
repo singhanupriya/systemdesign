@@ -1,0 +1,127 @@
+Observer design pattern
+
+
+/*
+
+U are using an e-commerce site and some product is out of stock. There is a notify me option
+which will notify the customer once the product is back in stock.
+
+Observer design pattern
+
+1. U have a fn setStockCount. u check if earlier count=0, u notify users and add this new count
+
+*/
+
+#include<iostream>
+#include<vector>
+
+using namespace std;
+
+class Observer{
+
+    public:
+
+    virtual void update()=0;
+
+};
+
+class ProductNotifUser: public Observer{
+
+    string userId;
+
+    public:
+
+    ProductNotifUser(string userId)
+    {
+        this->userId=userId;
+    }
+
+    void update()
+    {
+        cout<<"Dear "<<this->userId<<" Product available now\n";
+    }
+
+};
+
+class Subscriber{
+
+    protected:
+    int stockCount=0;
+
+    vector<Observer*> listOfObservers;
+    
+
+
+    public:
+
+    virtual void addObserver(Observer* observer)=0;
+
+    virtual void removeObserver(Observer* observer)=0;
+
+    virtual void notify()=0;
+
+    virtual void setStockCount(int stockCount)=0; //this is basically to denote some event happens
+
+
+
+};
+
+class ProductAvailableSubscriber: public Subscriber{
+
+    public:
+
+    void addObserver(Observer* observer)
+    {
+        Subscriber::listOfObservers.push_back(observer);
+    }
+
+    void removeObserver(Observer* observer)
+    {
+        auto it=find(Subscriber::listOfObservers.begin(),Subscriber::listOfObservers.end(),observer);
+        Subscriber::listOfObservers.erase(it);
+    }
+
+    void notify()
+    {
+        for(auto it: Subscriber::listOfObservers)
+        {
+            cout<<"This is a product availability notification"<<endl;
+            it->update();
+        }
+    }
+
+    void setStockCount(int stockCount)
+    {
+        if(Subscriber::stockCount==0)
+        {
+            notify(); //if earlier stock count was 0, notify everyone stock has been added
+            
+        }
+
+        Subscriber::stockCount+=stockCount;
+        
+    }
+
+};
+
+int main()
+{
+    ProductNotifUser* user1= new ProductNotifUser("user1"); //child can be used in place of its parent
+    ProductNotifUser* user2= new ProductNotifUser("user2");
+
+    Subscriber* productSubscription= new ProductAvailableSubscriber();
+    productSubscription->addObserver(user1);
+    productSubscription->addObserver(user2);
+
+    productSubscription->setStockCount(10);
+
+
+
+}
+
+
+Output:
+This is a product availability notification
+Dear user1 Product available now
+This is a product availability notification
+Dear user2 Product available now
