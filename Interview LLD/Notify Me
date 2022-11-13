@@ -9,6 +9,16 @@ which will notify the customer once the product is back in stock.
 Observer design pattern
 
 1. U have a fn setStockCount. u check if earlier count=0, u notify users and add this new count
+2. Child class can be used in place of parent
+
+*/
+
+/*
+
+U are using an e-commerce site and some product is out of stock. There is a notify me option
+which will notify the customer once the product is back in stock.
+
+Observer design pattern
 
 */
 
@@ -25,23 +35,46 @@ class Observer{
 
 };
 
-class ProductNotifUser: public Observer{
+class MobileNotifUser: public Observer{
 
     string userId;
+    string mobileNum;
 
     public:
 
-    ProductNotifUser(string userId)
+    MobileNotifUser(string userId, string mobileNum)
     {
         this->userId=userId;
+        this->mobileNum=mobileNum;
     }
 
     void update()
     {
-        cout<<"Dear "<<this->userId<<" Product available now\n";
+        cout<<"Dear "<<this->userId<<" Product available now. You have been notified via mobile "<<this->mobileNum<<endl;
     }
 
 };
+
+class EmailNotifUser: public Observer{
+
+    string userId;
+    string email;
+
+    public:
+
+    EmailNotifUser(string userId, string email)
+    {
+        this->userId=userId;
+        this->email=email;
+    }
+
+    void update()
+    {
+        cout<<"Dear "<<this->userId<<" Product available now. You have been notified via mobile "<<this->email<<endl;
+    }
+
+};
+
 
 class Subscriber{
 
@@ -106,8 +139,8 @@ class ProductAvailableSubscriber: public Subscriber{
 
 int main()
 {
-    ProductNotifUser* user1= new ProductNotifUser("user1"); //child can be used in place of its parent
-    ProductNotifUser* user2= new ProductNotifUser("user2");
+    MobileNotifUser* user1= new MobileNotifUser("user1","111111111"); //child can be used in place of its parent
+    EmailNotifUser* user2= new EmailNotifUser("user2","me@gamil.com");
 
     Subscriber* productSubscription= new ProductAvailableSubscriber();
     productSubscription->addObserver(user1);
@@ -119,9 +152,9 @@ int main()
 
 }
 
-
 Output:
 This is a product availability notification
-Dear user1 Product available now
+Dear user1 Product available now. You have been notified via mobile 111111111
 This is a product availability notification
-Dear user2 Product available now
+Dear user2 Product available now. You have been notified via mobile me@gamil.com
+
