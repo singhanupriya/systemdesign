@@ -1,0 +1,248 @@
+
+1. Optimistic lock on seat checking.
+
+#include<iostream>
+#include<vector>
+#include<unordered_map>
+#include<mutex>
+
+using namespace std;
+
+class PilotManager;
+class Flight;
+class Seat;
+class Schedule;
+
+
+class Location{
+    string street;
+    string city;
+    string state;
+    string country;
+    int pincode;
+
+
+};
+
+class Airport{
+
+    string airportName;
+    string airportId;
+    Location location;
+
+};
+
+
+
+class Airline{
+    string airlineName;
+    string airlineId;
+    PilotManager* pilotManager;
+    vector<Flight*> listOfFlightsPerAirline;
+
+};
+
+class Flight{
+
+    string flightId;
+    string manufacturer;
+    int capacity;
+    
+    vector<Schedule*> flightSchedule;
+
+
+};
+
+enum class SeatCategory{
+    XL,
+    regular,
+
+};
+
+class Seat{
+
+    public: 
+    string seatId;
+    SeatCategory seatCategory;
+    double seatPrice;
+    bool isAvailable;
+
+};
+
+class Date{
+    int day;
+    int month;
+    int year;
+
+};
+
+class Time{
+    int hour;
+    int min;
+    int second;
+
+};
+
+enum class FlightStatus{
+    delayed,
+    cancel,
+    onTime,
+
+};
+
+class Schedule{
+
+    Date date;
+    Flight* flight;
+    string source;
+    Airport* sourceAirport;
+    string destination;
+    Airport* destinationAirport;
+    Time departure;
+    Time arrival;
+    double price;
+    FlightStatus flightStatus;
+    vector<Seat*> listOfSeatsOfFlight; //every flight schedule will have its own seats
+    static mutex mtx;
+
+    public:
+     vector<Seat*> getFlightSeats()
+     {
+         return listOfSeatsOfFlight;
+     }
+
+     bool checkSeatAvailability(vector<Seat*> userSelectedSeats)
+     {
+         int len=userSelectedSeats.size();
+         
+
+         for(int i=0;i<len;i++)
+         {
+             //here u put lock, so if one user is reading it other will not be able to read, optimistic lock, if not booked within 10 mins ,
+             //seat will be available again
+             mtx.lock();
+             if(!userSelectedSeats[i]->isAvailable)
+             {
+                 return false;
+             }
+             else
+             {
+                 userSelectedSeats[i]->isAvailable=false;
+             }
+             mtx.unlock();
+         }
+
+         return true;
+
+
+     }
+
+};
+
+class User{
+
+    protected:
+    string username;
+    
+    string emailId;
+    int mobileNum;
+
+};
+
+class Admin:public User{
+
+    string empId;
+
+    public:
+
+    void addAirline();
+    void removeAirline();
+    void addFlight();
+    void removeFlight();
+    void addFlightSchedule();
+    void cancelFlightSchedule();
+    void modifyFlightSchedule();
+
+};
+
+enum class Gender{
+    male,
+    female,
+    other,
+
+};
+
+class Passenger:public User{
+
+    string passportId;
+    Location passengerAddress;
+    Gender gender;
+
+    public:
+
+    void makeBooking();
+    void cancelBooking();
+
+
+};
+
+enum class ReservationStatus{
+    confirmed,
+    pending,
+    failed,
+
+};
+
+enum class PaymentStatus{
+
+    success,
+    failed,
+    processing,
+
+};
+
+enum class PaymentMethod{
+    UPI,
+    card,
+    netbanking,
+
+};
+
+class Payment{
+    string payementId;
+    Time paymentTime;
+    double amount;
+    PaymentMethod paymentMethod;
+    PaymentStatus paymentStatus;
+
+
+};
+
+class Reservation{
+
+    string reservationId;
+    Schedule* schedule;
+    unordered_map<Passenger*,Seat*> seatsReserved;
+    Time timeOfBooking;
+    ReservationStatus reservationStatus;
+    Payment* payment;
+
+
+
+};
+
+class FlightBookingSystem{
+
+    vector<Airline*> listOfAirlines;
+    unordered_map<Date, unordered_map< string, vector<Schedule>>> flightInventory;  //<date, < source+dest, vector<schedule>>>
+    vector<Reservation*> listOfReservation;
+
+    public:
+
+    vector<Schedule*> getFlights(Date date, string source, string destination);
+    void makeReservation(); //store reservation details in db
+    void cancelReservation(); //remove reservation details in db
+
+
+};
+
