@@ -1,0 +1,309 @@
+
+Extension:
+1. Factory design pattern to add enitiy like question, comment, ans
+2. Observer design pattern to notify when answer/comment is added/upvoted.
+
+
+#include<iostream>
+#include<vector>
+#include<unordered_map>
+
+using namespace std;
+
+class Question;
+class Answer;
+class Entity;
+class Comment;
+
+class User{
+
+
+    protected:
+
+    string userId;
+    string username;
+    string userEmail;
+
+    public:
+
+    User(string userId, string username, string userEmail)
+    {
+        this->userId=userId;
+        this->username=username;
+        this->userEmail=userEmail;
+    }
+
+    string getUserId()
+    {
+        return this->userId;
+    }
+
+    string getUsername()
+    {
+        return this->username;
+    }
+
+    string getUserEmail()
+    {
+        return this->userEmail;
+    }
+
+};
+
+class Guest: public User{
+
+    public:
+
+    vector<Question*> getAllQuestions();
+
+};
+
+class Member: public User{
+
+    public:
+
+    void addQuestion(Question* question)
+    {
+
+    }
+
+    void addAnswer(Question* question, Answer* answer)
+    {
+
+    }
+
+    void addComment(Entity* entity, Comment* comment)
+    {
+
+    }
+
+    void reportQuestion(Question* question)
+    {
+
+    }
+
+    void upVote(Entity* entity)
+    {
+
+    }
+
+};
+
+class Moderator:public User{
+    public:
+
+    void closeQuestion(Question* question)
+    {
+
+    }
+
+    void undeleteQuestion(Question* question)
+    {
+
+    }
+
+};
+
+class Time{
+
+    int hour;
+    int minute;
+    int second;
+
+};
+
+class Entity{
+
+    protected:
+
+    string entityId;
+    
+    Member* createdBy;
+    int vote;
+    Time createdAt;
+
+    public:
+
+    Entity(string entityId,  Member* member)
+    {
+        this->entityId=entityId;
+        
+        this->createdBy=member;
+        vote=0;
+
+    }
+
+    
+
+    void addVote()
+    {
+        this->vote++;
+    }
+
+    int getVote()
+    {
+        return this->vote;
+    }
+
+    
+
+
+};
+
+class Comment:public Entity{
+
+    string commentText;
+
+    public:
+
+    Comment(string Id, Member* member, string content):Entity(Id, member)
+    {
+        this->commentText;
+    }
+
+    void editComment(string content)
+    {
+        this->commentText=content;
+    }
+
+    string getCommentText()
+    {
+        return this->commentText;
+    }
+
+
+};
+
+class Answer:public Entity{
+
+    protected:
+
+    string answerText;
+
+    vector<Comment*> answerComments;
+
+    public:
+
+    Answer(string id, Member* member, string content): Entity(id, member)
+    {
+        this->answerText=content;
+    }
+
+    void editAnswer(string content)
+    {
+        this->answerText=content;
+    }
+
+    string getAnswerText()
+    {
+        return this->answerText;
+    }
+
+    void addComment(Comment* comment)
+    {
+        this->answerComments.push_back(comment);
+    }
+
+    vector<Comment*> getComments()
+    {
+        return this->answerComments;
+    }
+
+};
+
+enum class QuestionStatus{
+    active,
+    closed,
+    deleted,
+};
+
+class Question:public Entity{
+
+    protected:
+    string questionText;
+
+    vector<Comment*> questionComments;
+    vector<Answer*> questionAnswers;
+    QuestionStatus questionStatus;
+
+    public:
+
+    Question(string id, Member* member, string content): Entity(id, member)
+    {
+        this->questionText=content;
+    }
+
+    void editQuestion(string content)
+    {
+        this->questionText=content;
+    }
+
+    string getQuestionText()
+    {
+        return this->questionText;
+    }
+
+
+    void addCommentToQuestion(Comment* comment)
+    {
+        this->questionComments.push_back(comment);
+    }
+
+    void addAnswerToQuestion(Answer* comment)
+    {
+        this->questionAnswers.push_back(comment);
+    }
+
+    vector<Answer*> getQuestionAnswers()
+    {
+        return this->questionAnswers;
+    }
+
+    vector<Comment*> getQuestionComments()
+    {
+        return this->questionComments;
+    }
+
+    void changeStatus(Moderator* Moderator, string status)
+    {
+
+    }
+
+
+};
+
+
+class Inventory{
+
+    vector<Question*> questionList;
+
+    public:
+
+    void addQuestionToInventory(Question* question)
+    {
+        this->questionList.push_back(question);
+    }
+
+    vector<Question*> getAllQuestion()
+    {
+        return this->questionList;
+    }
+
+};
+
+class StackOverflow{
+
+    Inventory* inventory;
+    vector<Member*> listOfMembers;
+    vector<Moderator*> listOfModerator;
+
+    public:
+
+    StackOverflow()
+    {
+        this->inventory=new Inventory();
+    }
+
+    
+
+};
