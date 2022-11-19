@@ -1,0 +1,232 @@
+https://workat.tech/machine-coding/practice/design-key-value-store-6gz6cq124k65
+
+
+//https://workat.tech/machine-coding/practice/design-key-value-store-6gz6cq124k65
+
+
+//Here for ease, I have hard coded index 2,
+//Imp- since u are using DLL, set prev pointer also when inserting new node
+
+#include<iostream>
+
+using namespace std;
+
+class Node{
+
+    public:
+
+    string key;
+    string value;
+    Node* next;
+    Node* prev;
+
+    Node(string key, string value)
+    {
+        this->key=key;
+        this->value=value;
+        next=nullptr;
+        prev=nullptr;
+    }
+
+};
+
+class HashMap{
+
+    int capacity;
+    Node** arr;
+
+    int getHashIndex(string key)
+    {
+        int hashIndex=0;
+
+        int len=key.length();
+
+        for(int i=0;i<len;i++)
+        {
+            hashIndex= ((hashIndex*26 % capacity) + key[i]-'a')%capacity;
+        }
+
+        return hashIndex;
+    }
+
+    public:
+
+    HashMap(int capacity)
+    {
+        this->capacity=capacity;
+        arr=new Node*[capacity];
+    }
+
+    void addEntry(string key, string value)
+    {
+        int index=getHashIndex(key);
+
+        //cout<<index<<" ";
+
+        Node* curr=arr[2];
+        
+
+        if(curr==nullptr)
+        {
+            arr[2]=new Node(key,value);
+        }
+        else
+        {
+            while(curr && curr->next)
+            {
+                
+                if(curr->key==key)
+                {
+                    
+                    curr->value=value;
+                    
+                    return;
+                }
+                curr=curr->next;
+            }
+
+            
+            if(curr->key==key)
+            {
+                curr->value=value;
+                return;
+            }
+                //create last node and add after end
+            
+            Node* temp=new Node(key,value);
+            curr->next=temp;
+            temp->prev=curr;
+           // arr[2]=head;
+        }
+
+        
+        
+    }
+
+    void deleteEntry(string key)
+    {
+        int index=getHashIndex(key);
+
+        //cout<<index<<" ";
+
+        Node* curr=arr[2];
+        
+
+        if(curr==nullptr)
+        {
+            cout<<"No node present\n";
+            return;
+        }
+        else if(curr->key==key)
+        {
+            //first node to be deleted
+            Node* temp=curr;
+            arr[2]=curr->next;
+            delete(curr);
+            return;
+            
+        }
+        else
+        {
+            //second or later node to be deleted
+            while(curr)
+            {
+                if(curr->key==key)
+                {
+                    
+                    if(curr->next)
+                    {
+                        
+                        curr->prev->next=curr->next;
+                        
+                        curr->next->prev=curr->prev;
+                        
+                        
+                        return;
+                    }
+                    else
+                    {
+                        //last node to be deleted
+                        curr->prev->next=nullptr;
+                        curr->prev=nullptr;
+                        
+                        return;
+                    }
+                }
+
+                curr=curr->next;
+            }
+
+            //u come here means node not present
+            cout<<"Node not present\n";
+        }
+        
+    }
+
+    void traverse(int index)
+    {
+        Node* curr=arr[index];
+
+
+        while(curr)
+        {
+            cout<<curr->key<<"+"<<curr->value<<" ";
+            curr=curr->next;
+        }
+        cout<<endl;
+    }
+
+
+
+};
+
+int main()
+{
+    HashMap* hashMap=new HashMap(10);
+    hashMap->addEntry("hello","anu");
+    hashMap->traverse(2);
+
+    hashMap->addEntry("ho","anu");
+    hashMap->traverse(2);
+
+    hashMap->addEntry("heo","anu");
+    hashMap->traverse(2);
+
+    hashMap->addEntry("he","anu");
+    hashMap->traverse(2);
+
+    hashMap->addEntry("ho","asu");
+    hashMap->traverse(2);
+
+    hashMap->addEntry("he","sumo");
+    hashMap->traverse(2);
+
+    hashMap->deleteEntry("yi");
+
+    hashMap->deleteEntry("heo");
+    hashMap->traverse(2);
+
+    hashMap->deleteEntry("hello");
+    hashMap->traverse(2);
+
+    hashMap->deleteEntry("he");
+    hashMap->traverse(2);
+
+    
+    
+
+
+    return 0;
+}
+
+Output:
+hello+anu 
+hello+anu ho+anu 
+hello+anu ho+anu heo+anu 
+hello+anu ho+anu heo+anu he+anu 
+hello+anu ho+asu heo+anu he+anu 
+hello+anu ho+asu heo+anu he+sumo 
+Node not present
+hello+anu ho+asu he+sumo 
+ho+asu he+sumo 
+ho+asu 
