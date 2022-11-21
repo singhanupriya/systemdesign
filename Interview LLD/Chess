@@ -1,0 +1,322 @@
+https://www.youtube.com/watch?v=kk6QkWxz5jM&list=PL6W8uoQQ2c61X_9e6Net0WdYZidm7zooW&index=3
+
+1. How to initialise board, create a board in driver class and pass
+2. Factory design pattern for creating obj
+
+#include<iostream>
+#include<vector>
+#include<queue>
+
+using namespace std;
+
+class Entity{
+
+    protected:
+
+    string name;
+    string color;
+
+    public:
+
+    Entity(string name, string color)
+    {
+        
+        this->name=name;
+        this->color=color;
+    }
+
+    string getName()
+    {
+        return this->name;
+    }
+
+    virtual void move(int x, int y)=0;
+
+};
+
+class Pawn: public Entity{
+
+    public:
+    Pawn(string name, string color): Entity(name,color)
+    {
+
+    }
+
+    void move(int x, int y)
+    {
+        cout<<"Pawn new position is "<<x<<" "<<y<<endl;
+    }
+
+};
+
+
+class King: public Entity{
+
+    public:
+    King(string name, string color): Entity(name,color)
+    {
+
+    }
+
+    void move(int x, int y)
+    {
+        cout<<"King new position is "<<x<<" "<<y<<endl;
+    }
+
+};
+
+
+class Queen: public Entity{
+
+    public:
+    Queen(string name, string color): Entity(name,color)
+    {
+
+    }
+
+    void move(int x, int y)
+    {
+        cout<<"Queen new position is "<<x<<" "<<y<<endl;
+    }
+
+};
+
+class EntityFactory{
+
+    public:
+
+    static vector<Entity*> createEntity(string color)
+    {
+        vector<Entity*> pieceSet;
+        Entity* pawn1=new Pawn("Pawn",color);
+        Entity* pawn2=new Pawn("Pawn",color);
+        Entity* pawn3=new Pawn("Pawn",color);
+        Entity* pawn4=new Pawn("Pawn",color);
+        Entity* queen= new Queen("Queen", color);
+        Entity* king= new Queen("King", color);
+
+        pieceSet.push_back(pawn1);
+        pieceSet.push_back(pawn2);
+        pieceSet.push_back(pawn3);
+        pieceSet.push_back(pawn4);
+        pieceSet.push_back(queen);
+        pieceSet.push_back(king);
+
+        return pieceSet;
+    }
+
+
+};
+
+class Player{
+
+    private:
+
+    string name;
+    string color;
+    vector<Entity*> pieceSet;
+
+    public:
+
+    Player(string name, string color)
+    {
+        this->name=name;
+        this->color=color;
+    }
+
+    string getPlayerName()
+    {
+        return this->name;
+    }
+
+    string getColor()
+    {
+        return this->color;
+    }
+
+    void setPiece(vector<Entity*> pieceSet)
+    {
+        this->pieceSet=pieceSet;
+    }
+
+    vector<Entity*> getPiece()
+    {
+        return this->pieceSet;
+    }
+
+};
+
+class Cell{
+
+    Entity* entity;
+
+    public:
+
+    Cell()
+    {
+        this->entity=nullptr;
+    }
+
+    void setPiece(Entity* entity)
+    {
+        this->entity=entity;
+    }
+
+    Entity* getCellPiece()
+    {
+        return this->entity;
+    }
+
+    void removePiece()
+    {
+        this->entity=nullptr;
+    }
+
+};
+
+class Board{
+
+    //8 x 8
+    vector<vector<Cell*> > board;
+
+    public:
+
+    Board( vector<vector<Cell*> > board)
+    {
+        
+        this->board=board;
+        cout<<"-------\n";
+        for(int i=0;i<board.size();i++)
+        {
+            for(int j=0;j<board.size();j++)
+            {
+                cout<<board[i][j]<<" ";
+            }
+            cout<<endl;
+        }
+        
+        
+        
+    }
+
+    void playPiece(Entity* entity, int startX, int startY, int endX, int endY)
+    {
+        //now suppose if at a new piece a entity already it will get killed
+        //first check if something present there
+
+        Entity* existingPiece= board[endX][endY]->getCellPiece();
+        if(existingPiece!=nullptr)
+        {
+            cout<<existingPiece->getName()<<" is killed \n";
+        }
+        
+        //piece which will be played
+        board[startX][startY]->removePiece();
+        board[endX][endY]->setPiece(entity);
+    }
+
+    Cell* getCell(int x, int y)
+    {
+        return board[x][y];
+    }
+
+    
+
+};
+
+
+class Chess{
+
+    Board* board;
+    Player* player1;
+    Player* player2;
+    queue<Player*> turnQueue;
+    
+
+    public:
+
+    Chess(Player* player1, Player* player2)
+    {
+        vector<vector<Cell*> > startBoard(4, vector<Cell*> (4,nullptr));
+        for(int i=0;i<4;i++)
+        {
+            for(int j=0;j<4;j++)
+            {
+                startBoard[i][j]=new Cell();
+            }
+        }
+
+        for(int i=0;i<startBoard.size();i++)
+        {
+            for(int j=0;j<startBoard.size();j++)
+            {
+                cout<<startBoard[i][j]<<" ";
+            }
+            cout<<endl;
+        }
+        //create board here itself and pass in fn
+        board=new Board(startBoard);
+        player1=player1;
+        player2=player2;
+        turnQueue.push(player1);
+        turnQueue.push(player2);
+
+
+
+        
+    }
+
+    void play(Player* player, Entity* entity, int x, int y, int newX, int newY)
+    {
+       board->playPiece(entity, x,y,newX, newY);
+
+        
+    }
+
+
+
+    
+
+};
+
+int main()
+{
+    
+
+    Player* player1= new Player("player1","black");
+    vector<Entity*> player1Set= EntityFactory::createEntity("black");
+    player1->setPiece(player1Set);
+    Player* player2= new Player("player2","white");
+    vector<Entity*> player2Set= EntityFactory::createEntity("white");
+    player2->setPiece(player2Set);
+    cout<<"Player 1 details:"<< player1->getPlayerName()<<endl;
+    cout<<"Player 2 details:"<< player2->getPlayerName()<<endl;
+
+    //cout<<player1->getPiece().size();
+
+
+
+    Chess* chess=new Chess(player1, player2 );
+
+    Entity* pawn=new Pawn("pawn","black");
+
+    chess->play(player1,pawn,1,1,2,2);
+
+
+
+    return 0;
+}
+
+Output:
+
+Player 1 details:player1
+Player 2 details:player2
+0x600002de0040 0x600002de0050 0x600002de0060 0x600002de0070 
+0x600002de0080 0x600002de0090 0x600002de00a0 0x600002de00b0 
+0x600002de00c0 0x600002de00d0 0x600002de00e0 0x600002de00f0 
+0x600002de0100 0x600002de0110 0x600002de0120 0x600002de0130 
+-------
+0x600002de0040 0x600002de0050 0x600002de0060 0x600002de0070 
+0x600002de0080 0x600002de0090 0x600002de00a0 0x600002de00b0 
+0x600002de00c0 0x600002de00d0 0x600002de00e0 0x600002de00f0 
+0x600002de0100 0x600002de0110 0x600002de0120 0x600002de0130 
