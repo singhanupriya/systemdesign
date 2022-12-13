@@ -1,0 +1,136 @@
+
+
+1. Token bucket
+
+#include <iostream>
+#include<mutex>
+
+using namespace std;
+
+
+class TokenBucket{
+    
+    int bucketCapacity;
+    int refreshRate; //token per min
+    int currentCapacity;
+    int lastUpdatedTime; //to check how much time has been passed
+    static mutex mtx; //thread safe
+    
+    
+    public:
+    
+    TokenBucket(int bucketCapacity, int refreshRate, int systemTime)
+    {
+        this->bucketCapacity=bucketCapacity;
+        this->refreshRate=refreshRate;
+        this->currentCapacity=bucketCapacity; //at time t=0
+        this->lastUpdatedTime=systemTime; //min
+    }
+    
+    bool grantAccess()
+    {
+        //this will be in thread
+        bool access=false;
+       
+       //since mutex if expensive, u only need lock when token is available
+        if(currentCapacity>0)
+        {
+            mtx.lock();
+            if(currentCapacity>0)
+            {
+                currentCapacity--;
+                cout<<"Access granted\n";
+                access=true;
+                
+            }
+            mtx.unlock();
+        }
+        
+        
+        return access;
+    }
+    
+    //This will run every min
+    void refillBucket()
+    {
+        //refreshrate is suppose 3 token per min,. currSystemTime in min
+        int extraToken= (int)(currSystemTime - lastUpdatedTime) * refreshRate;
+        
+        currentCapacity= min(currentCapacity+extraToken, bucketCapacity);
+        
+        
+    }
+    
+};
+
+
+2. Leafy bucket
+
+#include<iostream>
+#include<mutex>
+#include<queue>
+
+using namespace std;
+
+int min(int a, int b)
+{
+    if(a<=b)
+    {
+        return a;
+    }
+    return b;
+}
+
+class LeafyBucket{
+    
+    queue<int> tokenQueue;
+    int size;
+    int outflowRate;  //token per min consumed
+    static mutex mtx;
+    
+    public:
+    
+    
+    LeafyBucket(int size, int outflowRate)
+    {
+        this->size=size;
+        this->outflowRate=outflowRate;
+    }
+    
+    bool giveAccess(int id)
+    {
+        bool access=false;
+        
+        if(tokenQueue.size() < size)
+        {
+            mtx.lock();
+            int currSize= tokenQueue.size();
+            
+            if(currSize < size)
+            {
+                tokenQueue.push(id);
+                access=true;
+            }
+            mtx.unlock();
+        }
+        
+        
+        return access;
+    }
+    
+    void processRequest()
+    {
+        int requestRemoved=min(tokenQueue.size(), outflowRate);
+        
+        for(int i=0;i<requestRemoved;i++)
+        {
+            tokenQueue.pop();
+        }
+        
+        
+        
+    }
+    
+    
+    
+};
