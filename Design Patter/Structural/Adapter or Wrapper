@@ -75,7 +75,7 @@ class ToyDuck: public Duck{
 };
 
 
-//Now u are short of toyducks and want to use bird class as a toyducks
+//Now u are short of birds and want to use bird as a duck, so in duck fn call bird fn
 
 class BirdAdapter: public Duck{
     
