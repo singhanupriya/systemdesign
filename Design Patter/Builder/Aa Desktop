@@ -2,6 +2,20 @@ https://www.youtube.com/watch?v=MrrrtQT_8SE
 
 We will be building a Desktop.
 
+++ Complex object
+++ Has configurations
+
+
+/*
+
+1. Product - desktop - all fns like set mouse, keyboard,etc
+2. Builder class (abstract)- has a desktop obj and virtual fns like buildmouse, buildkeyboard. Its constuctor creates product.
+3. Concreate builder class which overrides the fns of builder class
+4. Director - has builder class obj, creates this in its constructor and call bulder fns like buildmouse, buildkeyboard.
+
+*/
+
+
 /******************************************************************************
 
 Welcome to GDB Online.
