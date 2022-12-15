@@ -1,0 +1,309 @@
+https://www.youtube.com/watch?v=9ORcPv_Tbz8&t=2143s
+
+/*
+
+1. Elevator Car has a :
+    - id
+    - int floor
+    - Direction Dir
+    - Internal button
+    - Status status (moving, idle)
+
+    -move(floor,dir)
+
+Elevator is a dum b obj, u need someone to control, who will tell which floor and direction to go next
+
+2. Elevator Controller has a:
+    - Elevator
+    - minHeap(up direction) and maxHeap (down direction) to store pending requests
+
+    -addRequests(int dir, int floor)
+    - fulfilRequest(int dir, int floor) //will send this to elevator
+
+3. Internal Button has a:
+    - Internal button dispatcher
+
+    - addRequest (id, floor, dir)
+
+
+
+4. Internal Button Dispatcher
+    - sendRequest(id, floor,dir) //button pressed of a lift, only that lift will fulfil this request
+
+5. External Button Dispatcher  //here u can have different methods to decide to which lift this request will go to
+    - int floor
+    - int direction
+
+    - Elevator* decideLiftToFulfilRequest(Method* method)
+    {
+        method->implement; //u send request to that controller
+    }
+
+6. Method
+    implement()=0
+
+7. OddEven implements method
+8. half Half implements method
+9. Nearest implement method
+
+10. ElevatorMgtSystem has a:
+    <Elevator,ElevatorController>
+
+
+*/
+
+#include<iostream>
+#include<vector>
+#include<unordered_map>
+#include<priority_queue>
+
+class InternalButton;
+class InternalButtonDispatcher;
+class ElevatorMgtSystem;
+class DispatcherMethod;
+
+enum class Direction{
+    up,
+    down,
+
+};
+
+enum class Status{
+    moving,
+    idle,
+
+};
+
+class ElevatorCar{
+    int id;
+    int floor;
+    Direction direction;
+    Status status;
+    InternalButton* internalButton;
+
+    public:
+
+    ElevatorCar(int id)
+    {
+        this->id=id;
+        status=Status::idle;
+    }
+
+    void move(int floor, Direction direction)
+    {
+        this->floor=floor;
+        this->direction=direction;
+        this->status=Status::moving;
+    }
+
+    Status getStatus()
+    {
+        return this->status;
+    }
+
+    int getFloor()
+    {
+        return this->floor;
+    }
+
+    Direction getDirection()
+    {
+        return this->direction;
+    }
+
+};
+
+class ElevatorController{
+
+    ElevatorCar* elevator;
+    priority_queue<int,vector<int>, greater<int> >  minHeap; //when moving in up direction
+    priority_queue<int> maxHeap; //when moving in downwards direction
+
+    public:
+
+    acceptRequest(int floor, Direction direction)
+    {
+        //if my request is to go up, add in minHeap
+
+        Direction currDirection= elevator->getDirection();
+        int currFloor= elevator->getFloor();
+        Status currStatus= elevator->getStatus();
+
+        if(currStatus== Status::idle)
+        {
+            elevator->move(floor,direction);
+        }
+        else
+        {
+            if(currDirection==Direction::down)
+            {
+                //if I am moving down and the current floor is lower than mine then I can fulfil that request
+                if(floor <= currFloor)
+                {
+                    maxHeap.push(floor);
+                }
+                else
+                {
+                    minHeap.push(floor); //else I will fulfil that in next round
+                }
+                
+            }
+            else
+            {
+                //If I am moving up and request floor is greater than curr floor, then I can fulfil that request in same run
+
+                if(floor>= currFloor)
+                {
+                    minHeap.push(floor);
+                }
+                else
+                {
+                    //fulfil in next round
+                    maxHeap.push(floor);
+                }
+
+            }
+
+        }
+
+        
+    }
+
+    void fulfilRequest()
+    {
+        Direction currDirection= elevator->getDirection();
+
+        if(currDirection== Direction::up)
+        {
+            while(!minHeap.empty())
+            {
+                elevator->move(minHeap.top(), currDirection);
+                minHeap.pop();
+            }
+
+            //now change direction and move down
+            while(!maxHeap.empty())
+            {
+                elevator->move(minHeap.top(), Direction::down);
+                maxHeap.pop();
+            }
+        }
+        else
+        {
+           //fulfil downwards request first
+            while(!maxHeap.empty())
+            {
+                elevator->move(minHeap.top(), Direction::down);
+                maxHeap.pop();
+            }
+
+            //them move up
+            while(!minHeap.empty())
+            {
+                elevator->move(minHeap.top(), Direction::up);
+                minHeap.pop();
+            }
+        }
+    }
+
+
+
+};
+
+class InternalButtonDispatcher{
+
+    public:
+
+    void sentRequestToController(int id, int floor, Direction direction)
+    {
+        ElevatorController* controller= ElevatorMgtSystem->getController(id);
+        controller->acceptRequest(floor,direction);
+    }
+
+};
+
+class InternalButton{
+
+    InternalButtonDispatcher* internalButtonDispatcher;
+
+    public:
+
+    void pressButton(int id, int floor, Direction direction)
+    {
+        internalButtonDispatcher->sentRequestToController(id,floor,direction);
+    }
+
+
+
+};
+
+class ExternalButtonDispatcher{
+
+    DispatcherMethod* dispatcherMethod;
+
+    public: 
+
+    void setDispatcherMethod(DispatcherMethod* dispatcherMethod)
+    {
+        this->dispatcherMethod=dispatcherMethod;
+    }
+
+    void sendRequest(int floor, Direction direction)
+    {
+        ElevatorController* controller= dispatcherMethod->getController(floor,direction);
+        controller->acceptRequest(floor,direction);
+    }
+
+
+
+};
+
+class DispatcherMethod{
+
+    public:
+
+    virtual ElevatorController* getController(int floor, Direction direction )=0;
+
+};
+
+class OddEvenDispatcher: public DispatcherMethod;
+{
+    public:
+    
+    ElevatorController* selectController(int floor, Direction direction)
+    {
+
+    }
+}
+
+class NearestDispatcher: public DispatcherMethod;
+{
+    public:
+    
+    ElevatorController* selectController(int floor, Direction direction)
+    {
+        
+    }
+}
+
+
+class ElevatorMgtSystem{
+
+    unordered_map<int,ElevatorController*> idControllerMapping;
+
+    public:
+
+    ElevatorController* getController(int id)
+    {
+        return idControllerMapping[id];
+    }
+
+};
+
+
+int main()
+{
+
+
+    return 0;
+}
